@@ -1,0 +1,29 @@
+{
+  "name": "cra-interview-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev:web",
+    "dev:web": "vite --host 0.0.0.0",
+    "build": "npm run typecheck && npm run build:web",
+    "build:web": "vite build",
+    "typecheck": "npm run typecheck:web",
+    "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json"
+  },
+  "dependencies": {
+    "element-plus": "^2.14.3",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "typescript": "5.9.3",
+    "vite": "^8.1.4",
+    "vue-tsc": "^3.3.7"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
