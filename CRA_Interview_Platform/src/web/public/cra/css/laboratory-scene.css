@@ -1,0 +1,37 @@
+/* Only soften the original architecture render; layout and interactions stay untouched. */
+.architecture-w::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 36rem;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.001);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+@media screen and (max-width: 767px) {
+  body {
+    min-height: 100vh;
+    overflow: hidden !important;
+  }
+
+  body > :not(script):not(style) {
+    display: none !important;
+  }
+
+  body::after {
+    content: "请移步至电脑端进行查看";
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #252525;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+}
