@@ -1,4 +1,4 @@
-﻿import {
+import {
   g as e,
   C as t,
   _ as s,
@@ -3472,11 +3472,7 @@ function Ue() {
       xe(J.EAGER, X.IS_DEV).then((e) => {
         ae.classList.add("fonts-loaded");
       }),
-    console.log(
-      "%c built by OFF+BRAND. %c > https://itsoffbrand.com",
-      "background-color: #FDFDF5; color: black; font: 400 1em monospace; padding: 0.5em 0; font-weight: bold;",
-      "",
-    ));
+    void 0);
 }
 function Fe() {
   updateViewportUnits();
