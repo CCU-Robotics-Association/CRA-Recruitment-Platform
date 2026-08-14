@@ -637,7 +637,7 @@ const Pe = Object.freeze(
                 $nextButton: this.$nextButton,
               });
               break;
-            case "history":
+            case "gallery":
               e = ((
                 {
                   modules: e,
@@ -733,7 +733,7 @@ const Pe = Object.freeze(
               });
           }
           if (this.length > 1) {
-            if ("history" === this.type && !ce) return;
+            if ("gallery" === this.type && !ce) return;
             if ("projects" === this.type && !ce) return;
             ((this.carousel = new c(this.$container, e)),
               this.carousel.on("progress", this.onProgress));
@@ -1015,7 +1015,7 @@ const Pe = Object.freeze(
         }
       },
       Header: de,
-      History: class extends s {
+      Gallery: class extends s {
         constructor(e) {
           (super(e),
             (this.$draggableContainer = this.$("container")[0]),
@@ -1739,47 +1739,47 @@ const Pe = Object.freeze(
           }
         }
       },
-      Values: class extends s {
+      Spirit: class extends s {
         constructor(t) {
           (super(t),
-            e.set(".value__desc01,.value__desc02,.value__desc03", {
+            e.set(".spirit-visual__desc01,.spirit-visual__desc02,.spirit-visual__desc03", {
               opacity: 0.2,
             }),
             ce
-              ? (e.set(".value__shape01", { opacity: 0.2 }),
-                e.set(".value__shape02,.value__shape03", { opacity: 0 }))
-              : (e.set(".value__shape01,.value__shape02,.value__shape03", {
+              ? (e.set(".spirit-visual__shape01", { opacity: 0.2 }),
+                e.set(".spirit-visual__shape02,.spirit-visual__shape03", { opacity: 0 }))
+              : (e.set(".spirit-visual__shape01,.spirit-visual__shape02,.spirit-visual__shape03", {
                   opacity: 0.2,
                 }),
-                e.set(".value__mask-w", { opacity: 0 })));
+                e.set(".spirit-visual__mask-w", { opacity: 0 })));
         }
         init() {
           ce ? this.initMobileTimeline() : this.initTimeline();
         }
         initMobileTimeline() {
-          ((this.valuesTl = e
+          ((this.spiritTl = e
             .timeline({ defaults: { duration: 6, ease: se } })
-            .to(".value__shape01, .value__desc01", { opacity: 1 })
+            .to(".spirit-visual__shape01, .spirit-visual__desc01", { opacity: 1 })
             .to({}, { duration: 3 })
-            .to(".value__shape02, .value__desc02", { opacity: 1 })
-            .to(".value__desc01", { opacity: 0.2 }, "<")
+            .to(".spirit-visual__shape02, .spirit-visual__desc02", { opacity: 1 })
+            .to(".spirit-visual__desc01", { opacity: 0.2 }, "<")
             .to({}, { duration: 3 })
-            .to(".value__shape03, .value__desc03", { opacity: 1 })
-            .to(".value__desc02", { opacity: 0.2 }, "<")
+            .to(".spirit-visual__shape03, .spirit-visual__desc03", { opacity: 1 })
+            .to(".spirit-visual__desc02", { opacity: 0.2 }, "<")
             .to({}, { duration: 3 })),
             a.create({
-              trigger: "#valuesSticky",
+              trigger: "#associationSpiritSticky",
               start: "0% 0%",
               end: "350% 100%",
               pin: !0,
               anticipatePin: 1,
               scrub: !0,
-              animation: this.valuesTl,
+              animation: this.spiritTl,
               invalidateOnRefresh: !0,
             }),
-            (this.valuesOutTl = e
+            (this.spiritOutTl = e
               .timeline({ defaults: { duration: 4, ease: se } })
-              .to(".value__mask-w", { opacity: 1 }, "<")
+              .to(".spirit-visual__mask-w", { opacity: 1 }, "<")
               .from(
                 ".cube._1",
                 { marginLeft: "23rem", marginTop: "18rem" },
@@ -1821,42 +1821,42 @@ const Pe = Object.freeze(
                 "<",
               )),
             a.create({
-              trigger: "#contact",
+              trigger: "#join-us",
               start: "0% 0%",
               end: "+=350% 75%",
               anticipatePin: 1,
               scrub: !0,
-              animation: this.valuesOutTl,
+              animation: this.spiritOutTl,
               invalidateOnRefresh: !0,
             }));
         }
         initTimeline() {
-          ((this.valuesTl = e
+          ((this.spiritTl = e
             .timeline({ defaults: { duration: 4, ease: se } })
-            .to(".value__shape01, .value__desc01", { opacity: 1 })
+            .to(".spirit-visual__shape01, .spirit-visual__desc01", { opacity: 1 })
             .to({}, { duration: 2 })
-            .to(".value__shape02, .value__desc02", { opacity: 1 })
-            .to(".value__desc01", { opacity: 0.2 }, "<")
+            .to(".spirit-visual__shape02, .spirit-visual__desc02", { opacity: 1 })
+            .to(".spirit-visual__desc01", { opacity: 0.2 }, "<")
             .to({}, { duration: 2 })
-            .to(".value__shape03, .value__desc03", { opacity: 1 })
-            .to(".value__desc02", { opacity: 0.2 }, "<")
+            .to(".spirit-visual__shape03, .spirit-visual__desc03", { opacity: 1 })
+            .to(".spirit-visual__desc02", { opacity: 0.2 }, "<")
             .to({}, { duration: 2 })),
             a.create({
-              trigger: "#valuesSticky",
+              trigger: "#associationSpiritSticky",
               start: "0% 0%",
               end: "250% 100%",
               pin: !0,
               anticipatePin: 1,
               scrub: 1,
-              animation: this.valuesTl,
+              animation: this.spiritTl,
               invalidateOnRefresh: !0,
             }),
-            (this.valuesOutTl = e
+            (this.spiritOutTl = e
               .timeline({ defaults: { duration: 4, ease: se } })
-              .to(".values-w", {
+              .to(".association-spirit-w", {
                 clipPath: "inset(0% 8rem 58rem round 0rem 0rem 2.4rem 2.4rem",
               })
-              .to(".value__mask-w", { opacity: 1 }, "<")
+              .to(".spirit-visual__mask-w", { opacity: 1 }, "<")
               .from(
                 ".cube._1",
                 { marginLeft: "23rem", marginTop: "18rem" },
@@ -1898,12 +1898,12 @@ const Pe = Object.freeze(
                 "<",
               )),
             a.create({
-              trigger: "#contact",
+              trigger: "#join-us",
               start: "0% 0%",
               end: "+=250% 75%",
               anticipatePin: 1,
               scrub: 1,
-              animation: this.valuesOutTl,
+              animation: this.spiritOutTl,
               invalidateOnRefresh: !0,
             }));
         }
@@ -1932,7 +1932,7 @@ const Pe = Object.freeze(
         }
         killTimeline() {
           var e;
-          null == (e = this.valuesTl) || e.kill();
+          null == (e = this.spiritTl) || e.kill();
         }
         destroy() {
           (super.destroy(), this.killTimeline());
@@ -2618,7 +2618,7 @@ class _e {
   constructor(t) {
     (e.registerPlugin(a),
       (this.params = t),
-      (this.id = "architecture"),
+      (this.id = "robot-showcase"),
       (this.gl = new Ie()),
       (this.isRevealEnded = !1),
       (this.isRendering = !1),
@@ -2646,24 +2646,24 @@ class _e {
               uTransitionToInteractive: new L(0),
               uMouseEffect: new L(0),
               uVideoEnded: new L(!1),
-              tArchitectureDiffuse: new L(
-                this.gl.assets.textures.architecture.diffuse,
+              tRobotShowcaseDiffuse: new L(
+                this.gl.assets.textures.robotShowcase.diffuse,
               ),
-              tArchitectureMovec: new L(
-                this.gl.assets.textures.architecture.movec,
+              tRobotShowcaseMovec: new L(
+                this.gl.assets.textures.robotShowcase.movec,
               ),
-              tArchitectureNormal: new L(
-                this.gl.assets.textures.architecture.normal,
+              tRobotShowcaseNormal: new L(
+                this.gl.assets.textures.robotShowcase.normal,
               ),
-              tArchitectureReveal: new L(
-                this.gl.assets.videos.architecture.reveal,
+              tRobotShowcaseReveal: new L(
+                this.gl.assets.videos.robotShowcase.reveal,
               ),
               uMouse: new L(new v(0, 0)),
             },
             vertexShader:
               "\n            varying vec2 vUv;\n\n            uniform vec2 uScale;\n            uniform vec2 uPosition;\n            uniform vec2 uResolution;\n\n            void main() {\n              vec2 pos = position.xy * 2.0;\n\n              // Scale\n              pos.x *= uScale.x / uResolution.x;\n              pos.y *= uScale.y / uResolution.y;\n\n              // Position\n              pos.x += - 1.0 + uPosition.x / uResolution.x * 2. + uScale.x / uResolution.x;\n              pos.y -= uPosition.y / uResolution.y * 2.0;\n              \n              gl_Position = vec4(pos.xy, 0.0, 1.0);\n            \n              // Varyings\n              vUv = uv;\n            }\n          ",
             fragmentShader:
-              "\n            varying vec2 vUv;\n\n            uniform sampler2D tDiffuse;\n\n            uniform float uDisplacementStrength;\n            uniform float uCameraAspect;\n            uniform float uTransitionToInteractive;\n            uniform float uMouseEffect;\n            uniform vec3 uLightColor;\n            uniform vec2 uMouse;\n            uniform bool uVideoEnded;\n\n            uniform sampler2D tArchitectureDiffuse;\n            uniform sampler2D tArchitectureMovec;\n            uniform sampler2D tArchitectureNormal;\n            uniform sampler2D tArchitectureReveal;\n            \n            vec2 getSubUv (vec2 uv, float index){\n                // calculating normalized index relative to number of columns in the grid. 4 in our case\n                float ind = index/4.0;\n            \n                // Shrinks the UV coordinates to fit one cell of the 4x4 grid.\n                // Dividing by 4 maps the UV range of (0, 1) for the entire texture to (0, 0.25) for each cell.\n                vec2 uv1 = uv/4.0;\n            \n                // Offsets the y coordinate upward by 3/4 of the texture height to start from the top row (the grid is 4x4, so rows are 1/4 tall).\n                uv1.y += 3.0/4.0;\n            \n                // Horizontal offset\n                // fract(ind) * 4.0 isolates the fractional part of ind to determine the column within the grid (0 to 3).\n                // floor(...) / 4.0 maps this to the range (0, 0.25, 0.5, 0.75), corresponding to each column's start position.\n                uv1.x += floor(fract(ind)* 4.0)/4.0;\n            \n                // Vertical offset\n                // Divides ind by 4.0 to calculate the row index, then adjusts y downward by the appropriate amount (0, 0.25, 0.5, or 0.75).\n                uv1.y -= floor(fract(ind/4.0)*4.0)/4.0;\n            \n                return uv1;\n            }\n            \n            // blending of textures with next frame texture\n            vec4 getMap(sampler2D map, float blend, vec2 uv, vec2 nextUv, vec2 displacement, vec2 displacementNext){\n            \n                // Get the diffuse texture color\n                vec4 diffuse = texture2D(map, uv + displacement * blend);\n                // float alphaTexture = texture2D(alpha, uv).r; // alpha value of the current frame\n                // diffuse.a = alphaTexture; // Set the alpha value of the current frame\n            \n                // Get the diffuse texture color of the next frame\n                vec4 diffuseNext = texture2D(map, nextUv - (displacementNext * (1.0 - blend)));\n                // float alphaTextureNext = texture2D(alpha, nextUv).r; // alpha value of the next frame\n                // diffuseNext.a = alphaTextureNext; // Set the alpha value of the next frame\n            \n                // Mix the two textures based on the blend factor\n                return mix(diffuse, diffuseNext, blend);\n            }\n            \n            // calculating displacement of the texture based on the displacement map\n            vec2 getDisplacement(sampler2D map, vec2 uv, float strength){\n                // Get the displacement data from the texture\n                vec4 tData = texture2D(map, uv);\n                // Convert the displacement data to a vec2 in the range (-1, 1)\n                vec2 displacement = tData.rg;\n                // Normalize the displacement to the range (-1, 1) and scale it by the strength factor\n                displacement = (displacement - 0.5) * 2.0;\n                displacement *= strength;// scale the displacement\n                return displacement;\n            }\n            \n            vec3 getMotionVectorMap(vec4 transformedPosition){\n                vec4 mv = transformedPosition;\n                vec3 color = abs(mv.xyz);\n                return color;\n            }\n\n            vec2 rotateUV(vec2 uv, float angle, vec2 pivot) {\n              float s = sin(angle);\n              float c = cos(angle);\n          \n              // Translate UV to pivot\n              uv -= pivot;\n          \n              // Apply rotation matrix\n              uv = mat2(c, -s, s, c) * uv;\n          \n              // Translate back\n              uv += pivot;\n          \n              return uv;\n            }\n\n            vec3 coolWarmLight(vec3 color) {\n              float brightness = max(max(color.r, color.g), color.b);\n              float warmSeparation = min(color.r - color.b, color.g - color.b);\n              float redGreenBalance = 1.0 - smoothstep(0.18, 0.46, abs(color.r - color.g));\n              float warmMask = smoothstep(0.055, 0.19, warmSeparation)\n                * smoothstep(0.38, 0.78, brightness)\n                * redGreenBalance;\n              float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));\n              vec3 coolWhite = clamp(vec3(luminance * 0.94, luminance * 1.02, luminance * 1.13), 0.0, 1.0);\n              return mix(color, coolWhite, warmMask * 0.9);\n            }\n            \n            void main() {\n              /* \n                Corrected UV\n              */\n              float aspect = uCameraAspect;\n              vec2 correctedUV = vUv;\n              correctedUV.y -= 0.5;\n              correctedUV.y *= aspect;\n              correctedUV.y += 0.5;\n\n              correctedUV.x *= 0.9;\n              correctedUV.x += 0.05;\n              correctedUV.y *= 0.9;\n              correctedUV.y += 0.05;\n              // correctedUV.x += uMouse.x * 0.05;\n\n              correctedUV = rotateUV(correctedUV, uMouse.y * uMouse.x * 0.05, vec2(0.5, 0.5));\n\n             /* \n               Mask\n             */\n             vec2 maskUV = vUv;\n             maskUV.y -= 0.5;\n             maskUV.y *= aspect;\n             maskUV.y += 0.5;\n\n             float mask = step(maskUV.y, 1.0) - step(maskUV.y, 0.0);\n\n              /* \n                Diffuse\n              */\n              vec2 textureUV = vUv;\n              // textureUV = rotateUV(textureUV, uMouse.y * uMouse.x * 0.05, vec2(0.5, 0.5));\n              // textureUV.x *= 0.9;\n              // textureUV.x += 0.05;\n              // textureUV.y *= 0.9;\n              // textureUV.y += 0.05;\n              // textureUV.x += uMouse.x * 0.05;\n\n              vec4 textureDiffuse = texture2D(tDiffuse, textureUV);\n\n              // Movement\n\n            \n              /* \n                Mouse\n              */\n              vec2 mouse = uMouse;\n              mouse.xy /= 2.;\n              mouse.xy += 0.5;\n            \n              /* \n                Index\n              */\n              float index = mix(0.0, 15.0, mouse.x * uMouseEffect);\n\n              /* \n                Video\n              */\n              vec4 textureReveal;\n\n              if (!uVideoEnded) {\n                textureReveal = texture2D(tArchitectureReveal, correctedUV);\n                textureReveal.rgb = coolWarmLight(textureReveal.rgb);\n              } else {\n                textureReveal = vec4(0.0);\n              }\n            \n              /* \n                Blend\n              */\n              float blend = fract(index);\n            \n              vec2 subUv = getSubUv(correctedUV, index);\n              vec2 subUvNext = getSubUv(correctedUV, index + 1.0);\n            \n              vec2 displacement = getDisplacement(tArchitectureMovec, subUv, uDisplacementStrength);\n              vec2 displacementNext = getDisplacement(tArchitectureMovec, subUvNext, uDisplacementStrength);\n            \n              vec4 diffuseMap = getMap(tArchitectureDiffuse, blend, subUv, subUvNext, displacement, displacementNext);\n              diffuseMap.rgb = coolWarmLight(diffuseMap.rgb);\n              vec4 normalMap = getMap(tArchitectureNormal, blend, subUv, subUvNext, displacement, displacementNext) * 2.0 - 1.0;\n              \n              float light = max(dot(normalMap.xyz, normalize(vec3(-uMouse.x, 0.0, -1.0))), 0.0) * uMouseEffect;\n              float cursor = 1.0 - clamp(distance(vUv, 0.5 + uMouse * 0.5) * 2.5, 0.0, 1.0);\n            \n              diffuseMap.rgb += mix(vec3(0.0), uLightColor, light * cursor) * 0.2;\n              vec4 color = vec4(vec3(mix(diffuseMap.rgb * mask, textureDiffuse.rgb, textureDiffuse.a)), 1.0);\n\n              float fade = smoothstep(1.0, 0.75, vUv.y) * smoothstep(0.0, 0.25, vUv.y);\n            \n              if (!uVideoEnded) {\n                gl_FragColor = mix(textureReveal, color, uTransitionToInteractive);\n              } else {\n                gl_FragColor = color;\n              }\n              // gl_FragColor.rgb = textureReveal.rgb;\n              gl_FragColor.a = fade; // Fade\n              \n              \n            }\n          ",
+              "\n            varying vec2 vUv;\n\n            uniform sampler2D tDiffuse;\n\n            uniform float uDisplacementStrength;\n            uniform float uCameraAspect;\n            uniform float uTransitionToInteractive;\n            uniform float uMouseEffect;\n            uniform vec3 uLightColor;\n            uniform vec2 uMouse;\n            uniform bool uVideoEnded;\n\n            uniform sampler2D tRobotShowcaseDiffuse;\n            uniform sampler2D tRobotShowcaseMovec;\n            uniform sampler2D tRobotShowcaseNormal;\n            uniform sampler2D tRobotShowcaseReveal;\n            \n            vec2 getSubUv (vec2 uv, float index){\n                // calculating normalized index relative to number of columns in the grid. 4 in our case\n                float ind = index/4.0;\n            \n                // Shrinks the UV coordinates to fit one cell of the 4x4 grid.\n                // Dividing by 4 maps the UV range of (0, 1) for the entire texture to (0, 0.25) for each cell.\n                vec2 uv1 = uv/4.0;\n            \n                // Offsets the y coordinate upward by 3/4 of the texture height to start from the top row (the grid is 4x4, so rows are 1/4 tall).\n                uv1.y += 3.0/4.0;\n            \n                // Horizontal offset\n                // fract(ind) * 4.0 isolates the fractional part of ind to determine the column within the grid (0 to 3).\n                // floor(...) / 4.0 maps this to the range (0, 0.25, 0.5, 0.75), corresponding to each column's start position.\n                uv1.x += floor(fract(ind)* 4.0)/4.0;\n            \n                // Vertical offset\n                // Divides ind by 4.0 to calculate the row index, then adjusts y downward by the appropriate amount (0, 0.25, 0.5, or 0.75).\n                uv1.y -= floor(fract(ind/4.0)*4.0)/4.0;\n            \n                return uv1;\n            }\n            \n            // blending of textures with next frame texture\n            vec4 getMap(sampler2D map, float blend, vec2 uv, vec2 nextUv, vec2 displacement, vec2 displacementNext){\n            \n                // Get the diffuse texture color\n                vec4 diffuse = texture2D(map, uv + displacement * blend);\n                // float alphaTexture = texture2D(alpha, uv).r; // alpha value of the current frame\n                // diffuse.a = alphaTexture; // Set the alpha value of the current frame\n            \n                // Get the diffuse texture color of the next frame\n                vec4 diffuseNext = texture2D(map, nextUv - (displacementNext * (1.0 - blend)));\n                // float alphaTextureNext = texture2D(alpha, nextUv).r; // alpha value of the next frame\n                // diffuseNext.a = alphaTextureNext; // Set the alpha value of the next frame\n            \n                // Mix the two textures based on the blend factor\n                return mix(diffuse, diffuseNext, blend);\n            }\n            \n            // calculating displacement of the texture based on the displacement map\n            vec2 getDisplacement(sampler2D map, vec2 uv, float strength){\n                // Get the displacement data from the texture\n                vec4 tData = texture2D(map, uv);\n                // Convert the displacement data to a vec2 in the range (-1, 1)\n                vec2 displacement = tData.rg;\n                // Normalize the displacement to the range (-1, 1) and scale it by the strength factor\n                displacement = (displacement - 0.5) * 2.0;\n                displacement *= strength;// scale the displacement\n                return displacement;\n            }\n            \n            vec3 getMotionVectorMap(vec4 transformedPosition){\n                vec4 mv = transformedPosition;\n                vec3 color = abs(mv.xyz);\n                return color;\n            }\n\n            vec2 rotateUV(vec2 uv, float angle, vec2 pivot) {\n              float s = sin(angle);\n              float c = cos(angle);\n          \n              // Translate UV to pivot\n              uv -= pivot;\n          \n              // Apply rotation matrix\n              uv = mat2(c, -s, s, c) * uv;\n          \n              // Translate back\n              uv += pivot;\n          \n              return uv;\n            }\n\n            vec3 coolWarmLight(vec3 color) {\n              float brightness = max(max(color.r, color.g), color.b);\n              float warmSeparation = min(color.r - color.b, color.g - color.b);\n              float redGreenBalance = 1.0 - smoothstep(0.18, 0.46, abs(color.r - color.g));\n              float warmMask = smoothstep(0.055, 0.19, warmSeparation)\n                * smoothstep(0.38, 0.78, brightness)\n                * redGreenBalance;\n              float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));\n              vec3 coolWhite = clamp(vec3(luminance * 0.94, luminance * 1.02, luminance * 1.13), 0.0, 1.0);\n              return mix(color, coolWhite, warmMask * 0.9);\n            }\n            \n            void main() {\n              /* \n                Corrected UV\n              */\n              float aspect = uCameraAspect;\n              vec2 correctedUV = vUv;\n              correctedUV.y -= 0.5;\n              correctedUV.y *= aspect;\n              correctedUV.y += 0.5;\n\n              correctedUV.x *= 0.9;\n              correctedUV.x += 0.05;\n              correctedUV.y *= 0.9;\n              correctedUV.y += 0.05;\n              // correctedUV.x += uMouse.x * 0.05;\n\n              correctedUV = rotateUV(correctedUV, uMouse.y * uMouse.x * 0.05, vec2(0.5, 0.5));\n\n             /* \n               Mask\n             */\n             vec2 maskUV = vUv;\n             maskUV.y -= 0.5;\n             maskUV.y *= aspect;\n             maskUV.y += 0.5;\n\n             float mask = step(maskUV.y, 1.0) - step(maskUV.y, 0.0);\n\n              /* \n                Diffuse\n              */\n              vec2 textureUV = vUv;\n              // textureUV = rotateUV(textureUV, uMouse.y * uMouse.x * 0.05, vec2(0.5, 0.5));\n              // textureUV.x *= 0.9;\n              // textureUV.x += 0.05;\n              // textureUV.y *= 0.9;\n              // textureUV.y += 0.05;\n              // textureUV.x += uMouse.x * 0.05;\n\n              vec4 textureDiffuse = texture2D(tDiffuse, textureUV);\n\n              // Movement\n\n            \n              /* \n                Mouse\n              */\n              vec2 mouse = uMouse;\n              mouse.xy /= 2.;\n              mouse.xy += 0.5;\n            \n              /* \n                Index\n              */\n              float index = mix(0.0, 15.0, mouse.x * uMouseEffect);\n\n              /* \n                Video\n              */\n              vec4 textureReveal;\n\n              if (!uVideoEnded) {\n                textureReveal = texture2D(tRobotShowcaseReveal, correctedUV);\n                textureReveal.rgb = coolWarmLight(textureReveal.rgb);\n              } else {\n                textureReveal = vec4(0.0);\n              }\n            \n              /* \n                Blend\n              */\n              float blend = fract(index);\n            \n              vec2 subUv = getSubUv(correctedUV, index);\n              vec2 subUvNext = getSubUv(correctedUV, index + 1.0);\n            \n              vec2 displacement = getDisplacement(tRobotShowcaseMovec, subUv, uDisplacementStrength);\n              vec2 displacementNext = getDisplacement(tRobotShowcaseMovec, subUvNext, uDisplacementStrength);\n            \n              vec4 diffuseMap = getMap(tRobotShowcaseDiffuse, blend, subUv, subUvNext, displacement, displacementNext);\n              diffuseMap.rgb = coolWarmLight(diffuseMap.rgb);\n              vec4 normalMap = getMap(tRobotShowcaseNormal, blend, subUv, subUvNext, displacement, displacementNext) * 2.0 - 1.0;\n              \n              float light = max(dot(normalMap.xyz, normalize(vec3(-uMouse.x, 0.0, -1.0))), 0.0) * uMouseEffect;\n              float cursor = 1.0 - clamp(distance(vUv, 0.5 + uMouse * 0.5) * 2.5, 0.0, 1.0);\n            \n              diffuseMap.rgb += mix(vec3(0.0), uLightColor, light * cursor) * 0.2;\n              vec4 color = vec4(vec3(mix(diffuseMap.rgb * mask, textureDiffuse.rgb, textureDiffuse.a)), 1.0);\n\n              float fade = smoothstep(1.0, 0.75, vUv.y) * smoothstep(0.0, 0.25, vUv.y);\n            \n              if (!uVideoEnded) {\n                gl_FragColor = mix(textureReveal, color, uTransitionToInteractive);\n              } else {\n                gl_FragColor = color;\n              }\n              // gl_FragColor.rgb = textureReveal.rgb;\n              gl_FragColor.a = fade; // Fade\n              \n              \n            }\n          ",
           }),
         ),
       }),
@@ -2840,8 +2840,8 @@ class _e {
         (console.log(
           this.renderPlane.mesh.material.uniforms.uVideoEnded.value,
         ),
-          this.gl.assets.videosDOM.architecture.reveal.play(),
-          this.gl.assets.videosDOM.architecture.reveal.addEventListener(
+          this.gl.assets.videosDOM.robotShowcase.reveal.play(),
+          this.gl.assets.videosDOM.robotShowcase.reveal.addEventListener(
             "ended",
             () => {
               (e.to(
@@ -3106,7 +3106,7 @@ class Ee {
       this.selectors.forEach((e, t) => {
         "clouds" === e.dataset.gl
           ? this.scenes.push(new ze({ dom: e }))
-          : "architecture" === e.dataset.gl &&
+          : "robot-showcase" === e.dataset.gl &&
             this.scenes.push(new _e({ dom: e }));
       }));
     for (const e in this.scenes)
@@ -3281,50 +3281,50 @@ class $e {
         matcap: new q(this.loadingManager).load(
           window.gl_assets.cloudsScene.textures.matcap,
         ),
-        architecture: {
+        robotShowcase: {
           diffuse: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.diffuse,
+            window.gl_assets.robotShowcaseScene.textures.diffuse,
           ),
           movec: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.movec,
+            window.gl_assets.robotShowcaseScene.textures.movec,
           ),
           normal: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.normal,
+            window.gl_assets.robotShowcaseScene.textures.normal,
           ),
         },
         trees: {
           a: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.trees.a,
+            window.gl_assets.robotShowcaseScene.textures.trees.a,
           ),
           b: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.trees.b,
+            window.gl_assets.robotShowcaseScene.textures.trees.b,
           ),
           c: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.trees.c,
+            window.gl_assets.robotShowcaseScene.textures.trees.c,
           ),
           d: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.trees.d,
+            window.gl_assets.robotShowcaseScene.textures.trees.d,
           ),
           e: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.trees.e,
+            window.gl_assets.robotShowcaseScene.textures.trees.e,
           ),
           alpha: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.trees.alpha,
+            window.gl_assets.robotShowcaseScene.textures.trees.alpha,
           ),
           shadow: new q(this.loadingManager).load(
-            window.gl_assets.architectureScene.textures.trees.shadow,
+            window.gl_assets.robotShowcaseScene.textures.trees.shadow,
           ),
         },
       }),
-      (this.textures.architecture.diffuse.minFilter = V),
-      (this.textures.architecture.diffuse.magFilter = V),
-      (this.textures.architecture.movec.minFilter = V),
-      (this.textures.architecture.movec.magFilter = V),
-      (this.textures.architecture.normal.minFilter = V),
-      (this.textures.architecture.normal.magFilter = V),
-      (this.textures.architecture.movec.colorSpace = N),
-      (this.textures.architecture.diffuse.colorSpace = N),
-      (this.textures.architecture.normal.colorSpace = N),
+      (this.textures.robotShowcase.diffuse.minFilter = V),
+      (this.textures.robotShowcase.diffuse.magFilter = V),
+      (this.textures.robotShowcase.movec.minFilter = V),
+      (this.textures.robotShowcase.movec.magFilter = V),
+      (this.textures.robotShowcase.normal.minFilter = V),
+      (this.textures.robotShowcase.normal.magFilter = V),
+      (this.textures.robotShowcase.movec.colorSpace = N),
+      (this.textures.robotShowcase.diffuse.colorSpace = N),
+      (this.textures.robotShowcase.normal.colorSpace = N),
       (this.textures.matcap.minFilter = V),
       (this.textures.matcap.magFilter = V));
     for (const e in this.textures.trees)
@@ -3333,24 +3333,24 @@ class $e {
         (this.textures.trees[e].colorSpace = N),
         (this.textures.trees[e].flipY = !1));
     ((this.videosDOM = {
-      architecture: { reveal: document.querySelector(".gl-reveal-video") },
+      robotShowcase: { reveal: document.querySelector(".gl-reveal-video") },
     }),
       (this.videos = {
-        architecture: { reveal: new j(this.videosDOM.architecture.reveal) },
+        robotShowcase: { reveal: new j(this.videosDOM.robotShowcase.reveal) },
       }),
-      (this.videos.architecture.reveal.minFilter = V),
+      (this.videos.robotShowcase.reveal.minFilter = V),
       (this.hdri = null),
       this.load());
   }
   load() {
     (this.gltfLoader.load(
-      window.gl_assets.architectureScene.models.tree,
+      window.gl_assets.robotShowcaseScene.models.tree,
       (e) => {
         this.models.tree = e.scene.children[0];
       },
     ),
       this.gltfLoader.load(
-        window.gl_assets.architectureScene.models.shadow,
+        window.gl_assets.robotShowcaseScene.models.shadow,
         (e) => {
           this.models.shadow = e.scene.children[0];
         },
@@ -3359,7 +3359,7 @@ class $e {
   loadVideo() {
     return new Promise((e) => {
       const t = setInterval(() => {
-        this.videosDOM.architecture.reveal.readyState >= 4 &&
+        this.videosDOM.robotShowcase.reveal.readyState >= 4 &&
           (e(), clearInterval(t));
       }, 100);
     });
@@ -3505,20 +3505,20 @@ window.gl_assets = {
       matcap: Ve + "/textures/cloud-matcap.png",
     },
   },
-  architectureScene: {
+  robotShowcaseScene: {
     textures: {
       diffuse:
         window.innerWidth > 1024
-          ? Ve + "/textures/architecture-diffuse-desktop.webp"
-          : Ve + "/textures/architecture-diffuse-mobile.webp",
+          ? Ve + "/textures/robot-showcase-diffuse-desktop.webp"
+          : Ve + "/textures/robot-showcase-diffuse-mobile.webp",
       movec:
         window.innerWidth > 1024
-          ? Ve + "/textures/architecture-motion-desktop.webp"
-          : Ve + "/textures/architecture-motion-mobile.webp",
+          ? Ve + "/textures/robot-showcase-motion-desktop.webp"
+          : Ve + "/textures/robot-showcase-motion-mobile.webp",
       normal:
         window.innerWidth > 1024
-          ? Ve + "/textures/architecture-normal-desktop.webp"
-          : Ve + "/textures/architecture-normal-mobile.webp",
+          ? Ve + "/textures/robot-showcase-normal-desktop.webp"
+          : Ve + "/textures/robot-showcase-normal-mobile.webp",
       trees: {
         a: Ve + "/textures/tree-diffuse-a.webp",
         b: Ve + "/textures/tree-diffuse-b.webp",
