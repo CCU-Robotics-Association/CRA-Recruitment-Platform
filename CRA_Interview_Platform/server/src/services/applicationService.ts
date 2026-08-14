@@ -10,6 +10,7 @@ import type { ApplicationRow, ApplicationStatus, RoundRow, SlotRow } from '../ty
 import { APPLICATION_STATUSES } from '../types.ts';
 import { applyPhase, getActiveRound, getRound } from './roundService.ts';
 import { getSlot } from './slotService.ts';
+import { ensureInterview } from './interviewService.ts';
 
 export interface CreateApplicationInput {
   roundId?: number;
@@ -229,6 +230,50 @@ export function reviewApplication(db: Db, id: number, reviewerId: number, review
     reviewerName,
     id,
     JSON.stringify({ from: app.status, to: input.status, note: input.note ?? null }),
+    now,
+  );
+
+  // 审核通过即进入面试环节：自动建立面试记录（幂等）
+  if (input.status === 'approved' && app.status !== 'approved') {
+    ensureInterview(db, id);
+  }
+
+  return getApplication(db, id);
+}
+
+/**
+ * 调整候选人的面试时段（管理端统一安排）。
+ * 校验新时段：属于同一轮次、启用、未满；写审计日志。
+ */
+export function rescheduleApplication(
+  db: Db,
+  id: number,
+  actorId: number,
+  actorName: string,
+  newSlotId: number,
+): ApplicationDetail {
+  const app = getApplication(db, id);
+  if (app.slotId === newSlotId) throw badRequest('新时段与当前时段相同');
+  const slot: SlotRow = getSlot(db, newSlotId);
+  if (slot.roundId !== app.roundId) throw badRequest('新面试时段不属于当前轮次');
+  if (!slot.isEnabled) throw conflict('该面试时段已停止预约');
+
+  const booked = (
+    db.prepare('SELECT COUNT(*) AS c FROM applications WHERE slot_id = ?').get(newSlotId) as { c: number }
+  ).c;
+  if (booked >= slot.capacity) throw conflict('该面试时段已约满，请选择其他时段');
+
+  const now = nowIso();
+  db.prepare('UPDATE applications SET slot_id = ?, updated_at = ? WHERE id = ?').run(newSlotId, now, id);
+
+  db.prepare(
+    `INSERT INTO audit_logs (actor_id, actor_name, action, entity, entity_id, detail, created_at)
+     VALUES (?, ?, 'application_reschedule', 'application', ?, ?, ?)`,
+  ).run(
+    actorId,
+    actorName,
+    id,
+    JSON.stringify({ fromSlotId: app.slotId, toSlotId: newSlotId }),
     now,
   );
 

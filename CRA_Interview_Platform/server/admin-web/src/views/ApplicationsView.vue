@@ -86,7 +86,11 @@ async function saveReview() {
       note: reviewNote.value || undefined,
     });
     detail.value = updated;
-    ElMessage.success('审核已更新');
+    if (reviewStatus.value === 'approved') {
+      ElMessage.success('审核已通过，候选人已进入面试队列，可在「面试管理」中安排与评分');
+    } else {
+      ElMessage.success('审核已更新');
+    }
     load();
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '审核失败');

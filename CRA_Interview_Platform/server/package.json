@@ -8,12 +8,13 @@
     "node": ">=24"
   },
   "scripts": {
-    "postinstall": "npm --prefix admin-web install",
+    "postinstall": "npm --prefix admin-web install && npm --prefix user-web install",
     "dev": "node --watch --env-file-if-exists=.env src/index.ts",
     "start": "node --env-file-if-exists=.env src/index.ts",
     "typecheck": "tsc --noEmit",
     "build:admin": "npm --prefix admin-web run build",
-    "build": "npm run typecheck && npm run build:admin"
+    "build:user": "npm --prefix user-web run build",
+    "build": "npm run typecheck && npm run build:admin && npm run build:user"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",

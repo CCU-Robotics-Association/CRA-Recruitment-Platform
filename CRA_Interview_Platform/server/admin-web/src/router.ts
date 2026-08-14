@@ -30,6 +30,12 @@ export const router = createRouter({
           meta: { title: '报名管理' },
         },
         {
+          path: 'interviews',
+          name: 'interviews',
+          component: () => import('./views/InterviewsView.vue'),
+          meta: { title: '面试管理' },
+        },
+        {
           path: 'slots',
           name: 'slots',
           component: () => import('./views/SlotsView.vue'),

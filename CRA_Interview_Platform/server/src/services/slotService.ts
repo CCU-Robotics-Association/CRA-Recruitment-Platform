@@ -2,7 +2,7 @@
  * 面试时段服务：查询（含剩余名额）、批量生成、修改、删除。
  */
 import type { Db } from '../lib/db.ts';
-import { toCamel } from '../lib/db.ts';
+import { toCamel, withTransaction } from '../lib/db.ts';
 import { badRequest, conflict, notFound } from '../lib/errors.ts';
 import { nowIso, slotKey, startOfLocalDay, TIMEZONE } from '../lib/time.ts';
 import type { RoundRow, SlotRow } from '../types.ts';
@@ -72,7 +72,7 @@ function parseLocalDate(date: string): Date {
 }
 
 /**
- * 批量生成时段。按北京时间逐日生成，自动跳过与已有时段重叠的起始时刻。
+ * 批量生成时段。按北京时间（Asia/Shanghai）逐日生成，自动跳过与已有时段重叠的起始时刻。
  */
 export function generateSlots(db: Db, input: GenerateSlotsInput): { created: number; skipped: number } {
   const startDate = parseLocalDate(input.startDate);
@@ -96,7 +96,7 @@ export function generateSlots(db: Db, input: GenerateSlotsInput): { created: num
   }
 
   const exists = db
-    .prepare('SELECT 1 FROM interview_slots WHERE round_id = ? LIMIT 1')
+    .prepare('SELECT 1 FROM recruitment_rounds WHERE id = ?')
     .get(input.roundId);
   if (!exists) {
     throw notFound('招募轮次不存在');
@@ -119,24 +119,25 @@ export function generateSlots(db: Db, input: GenerateSlotsInput): { created: num
   const now = nowIso();
   const totalSlots = Math.floor((dayEndMinutes - dayStartMinutes) / input.durationMinutes);
 
-  for (
-    let day = new Date(startDate.getTime());
-    day.getTime() <= endDate.getTime();
-    day = new Date(day.getTime() + 24 * 60 * 60 * 1000)
-  ) {
+  // 按北京时间计算：startDate/endDate 是北京时间的日期，startOfLocalDay 得到当天 00:00 对应的 UTC 时刻
+  const dayStartMs = startOfLocalDay(startDate).getTime();
+  const dayEndMs = startOfLocalDay(endDate).getTime();
+
+  for (let dayMs = dayStartMs; dayMs <= dayEndMs; dayMs += 24 * 60 * 60 * 1000) {
+    const day = new Date(dayMs);
     const weekday = new Intl.DateTimeFormat('en-US', { timeZone: TIMEZONE, weekday: 'short' }).format(day);
     if (input.excludeWeekends && (weekday === 'Sat' || weekday === 'Sun')) continue;
 
     for (let i = 0; i < totalSlots; i++) {
-      const slotStart = new Date(day.getTime() + (dayStartMinutes + i * input.durationMinutes) * 60_000);
-      const slotEnd = new Date(slotStart.getTime() + input.durationMinutes * 60_000);
-      const startsAt = slotStart.toISOString();
+      const slotStartMs = dayMs + (dayStartMinutes + i * input.durationMinutes) * 60_000;
+      const slotEndMs = slotStartMs + input.durationMinutes * 60_000;
+      const startsAt = new Date(slotStartMs).toISOString();
       if (existingStarts.has(startsAt)) {
         skipped += 1;
         continue;
       }
-      void slotKey(startsAt, slotEnd.toISOString());
-      insert.run(input.roundId, startsAt, slotEnd.toISOString(), input.capacity, now);
+      void slotKey(startsAt, new Date(slotEndMs).toISOString());
+      insert.run(input.roundId, startsAt, new Date(slotEndMs).toISOString(), input.capacity, now);
       created += 1;
     }
   }
@@ -179,6 +180,39 @@ export function deleteSlot(db: Db, id: number): void {
   }
   db.prepare('DELETE FROM interview_slots WHERE id = ?').run(id);
   void slot;
+}
+
+/**
+ * 批量删除时段（管理端多选删除）。事务内逐项校验：
+ * 已有报名的时段跳过并返回原因，其余删除；不存在/不可删的记入 failed。
+ */
+export function deleteSlotsBatch(
+  db: Db,
+  ids: number[],
+): { deleted: number; failed: Array<{ id: number; reason: string }> } {
+  const failed: Array<{ id: number; reason: string }> = [];
+  let deleted = 0;
+
+  withTransaction(db, () => {
+    for (const id of ids) {
+      const row = db.prepare('SELECT id FROM interview_slots WHERE id = ?').get(id);
+      if (!row) {
+        failed.push({ id, reason: '时段不存在' });
+        continue;
+      }
+      const booked = (
+        db.prepare('SELECT COUNT(*) AS c FROM applications WHERE slot_id = ?').get(id) as { c: number }
+      ).c;
+      if (booked > 0) {
+        failed.push({ id, reason: `已有 ${booked} 条报名，不能删除` });
+        continue;
+      }
+      db.prepare('DELETE FROM interview_slots WHERE id = ?').run(id);
+      deleted += 1;
+    }
+  });
+
+  return { deleted, failed };
 }
 
 export { startOfLocalDay };

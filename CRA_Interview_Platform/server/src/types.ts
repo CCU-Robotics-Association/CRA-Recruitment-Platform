@@ -81,6 +81,52 @@ export interface ApplicationRow {
   updatedAt: string;
 }
 
+/**
+ * 面试环节状态（独立于报名审核状态，由管理端统一流转）：
+ * - pending    待面试（审核通过后自动建立）
+ * - completed  已面试，待出结果
+ * - no_show    未到场
+ * - passed     面试通过
+ * - failed     面试不通过
+ * - waitlisted 面试候补
+ */
+export type InterviewStatus =
+  | 'pending'
+  | 'completed'
+  | 'no_show'
+  | 'passed'
+  | 'failed'
+  | 'waitlisted';
+
+export const INTERVIEW_STATUSES: InterviewStatus[] = [
+  'pending',
+  'completed',
+  'no_show',
+  'passed',
+  'failed',
+  'waitlisted',
+];
+
+export const INTERVIEW_STATUS_LABELS: Record<InterviewStatus, string> = {
+  pending: '待面试',
+  completed: '已面试',
+  no_show: '未到场',
+  passed: '通过',
+  failed: '不通过',
+  waitlisted: '候补',
+};
+
+export interface InterviewRow {
+  id: number;
+  applicationId: number;
+  status: InterviewStatus;
+  score: number | null;
+  comment: string | null;
+  resultPublishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PublicMetaResponse {
   round: {
     id: number;

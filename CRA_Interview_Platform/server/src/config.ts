@@ -22,6 +22,8 @@ export interface AppConfig {
   webDistDir: string | null;
   /** 管理端构建产物目录（可选，用于生产托管） */
   adminDistDir: string | null;
+  /** 用户端构建产物目录（可选，用于生产托管） */
+  userDistDir: string | null;
   /** 允许的跨域来源（开发模式下前端 dev server） */
   corsOrigins: string[];
   /** 默认管理员（首次启动种子时创建） */
@@ -90,6 +92,15 @@ function resolveAdminDist(): string | null {
   return resolve(raw);
 }
 
+function resolveUserDist(): string | null {
+  const raw = process.env.CRA_USER_DIST;
+  if (raw === undefined) {
+    return resolve(process.cwd(), '..', 'dist', 'user');
+  }
+  if (raw === '') return null;
+  return resolve(raw);
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const { dataDir, dbPath } = resolveDataDir();
 
@@ -102,6 +113,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     jwtExpiresInSeconds: int(env.CRA_JWT_EXPIRES_IN, 60 * 60 * 12),
     webDistDir: resolveWebDist(),
     adminDistDir: resolveAdminDist(),
+    userDistDir: resolveUserDist(),
     corsOrigins: resolveCorsOrigins(),
     bootstrapAdmin: {
       username: env.CRA_ADMIN_USERNAME ?? 'admin',

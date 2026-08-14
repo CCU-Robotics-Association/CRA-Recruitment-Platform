@@ -6,7 +6,7 @@
 import type { Db } from '../lib/db.ts';
 import { config } from '../config.ts';
 import { hashPassword } from '../lib/password.ts';
-import { nowIso } from '../lib/time.ts';
+import { nowIso, startOfLocalDay } from '../lib/time.ts';
 
 export interface SeedResult {
   adminCreated: boolean;
@@ -15,15 +15,16 @@ export interface SeedResult {
 }
 
 /**
- * 生成某天 09:00 起、每 durationMinutes 一个、共 count 个时段（匹配前端报名页）。
+ * 生成某天 09:00（北京时间）起、每 durationMinutes 一个、共 count 个时段（匹配前端报名页）。
+ * 使用 Asia/Shanghai 显式计算，不依赖服务器本地时区。
  */
 export function buildDefaultSlots(day: Date, durationMinutes: number, count: number) {
-  const start = new Date(day);
-  start.setHours(9, 0, 0, 0);
+  const dayStartMs = startOfLocalDay(day).getTime();
+  const startMs = dayStartMs + 9 * 60 * 60 * 1000; // 北京时间 09:00
   return Array.from({ length: count }, (_, i) => {
-    const s = new Date(start.getTime() + i * durationMinutes * 60_000);
-    const e = new Date(s.getTime() + durationMinutes * 60_000);
-    return { startsAt: s.toISOString(), endsAt: e.toISOString() };
+    const s = startMs + i * durationMinutes * 60_000;
+    const e = s + durationMinutes * 60_000;
+    return { startsAt: new Date(s).toISOString(), endsAt: new Date(e).toISOString() };
   });
 }
 

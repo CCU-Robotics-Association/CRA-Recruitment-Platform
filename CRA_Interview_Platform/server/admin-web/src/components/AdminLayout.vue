@@ -7,6 +7,7 @@ import {
   User,
   Calendar,
   Tickets,
+  ChatDotRound,
   SwitchButton,
 } from '@element-plus/icons-vue';
 import { authStore } from '../auth';
@@ -26,6 +27,7 @@ const roleLabel = computed(() => {
 const menus = [
   { path: '/', label: '仪表盘', icon: DataBoard, visible: true },
   { path: '/applications', label: '报名管理', icon: Tickets, visible: true },
+  { path: '/interviews', label: '面试管理', icon: ChatDotRound, visible: true },
   { path: '/slots', label: '面试时段', icon: Calendar, visible: authStore.canManage },
   { path: '/users', label: '账号管理', icon: User, visible: authStore.isSuperAdmin },
 ];

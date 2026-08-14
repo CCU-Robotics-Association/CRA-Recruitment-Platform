@@ -15,11 +15,12 @@ import { openDatabase } from './lib/db.ts';
 import type { Db } from './lib/db.ts';
 import { migrate } from './db/migrate.ts';
 import { seed } from './db/seed.ts';
-import { buildAuthenticate, requireRole } from './lib/auth.ts';
+import { buildAuthenticate, buildUserAuthenticate, requireRole } from './lib/auth.ts';
 import { AppError, notFound } from './lib/errors.ts';
 import { nowIso } from './lib/time.ts';
 import { registerPublicRoutes } from './routes/public.ts';
 import { registerAdminRoutes } from './routes/admin.ts';
+import { registerUserRoutes } from './routes/user.ts';
 
 export interface AppHandle {
   app: FastifyInstance;
@@ -93,6 +94,10 @@ export async function buildApp(): Promise<AppHandle> {
       reply.code(429).send({ error: { code: 'TOO_MANY_REQUESTS', message: '请求过于频繁，请稍后再试' } });
       return;
     }
+    if (typeof error === 'object' && error !== null && (error as { statusCode?: number }).statusCode === 415) {
+      reply.code(415).send({ error: { code: 'UNSUPPORTED_MEDIA_TYPE', message: '请求体格式不支持，请使用 application/json' } });
+      return;
+    }
     request.log.error(error);
     reply.code(500).send({ error: { code: 'INTERNAL_ERROR', message: '服务器内部错误' } });
   });
@@ -101,6 +106,7 @@ export async function buildApp(): Promise<AppHandle> {
   app.get('/api/health', async () => ({ status: 'ok', time: nowIso(), version: '1.0.0' }));
   registerPublicRoutes(app, db);
   registerAdminRoutes(app, db, { authenticate: buildAuthenticate(db), requireRole });
+  registerUserRoutes(app, db, { authenticateUser: buildUserAuthenticate(db) });
 
   // 静态托管（生产形态：单一进程同时服务 报名端 + 管理端 + API）
   // 注意：index.html 不缓存，SPA fallback 时实时读取，前端重新构建后无需重启服务
@@ -112,6 +118,17 @@ export async function buildApp(): Promise<AppHandle> {
       index: ['index.html'],
     });
     app.log.info(`管理端静态资源: ${config.adminDistDir} -> /admin/`);
+  }
+
+  if (config.userDistDir && existsSync(join(config.userDistDir, 'index.html'))) {
+    await app.register(fastifyStatic, {
+      root: config.userDistDir,
+      prefix: '/user/',
+      wildcard: true,
+      index: ['index.html'],
+      decorateReply: false,
+    });
+    app.log.info(`用户端静态资源: ${config.userDistDir} -> /user/`);
   }
 
   if (config.webDistDir && existsSync(join(config.webDistDir, 'index.html'))) {
@@ -136,6 +153,13 @@ export async function buildApp(): Promise<AppHandle> {
       if (adminIndex) {
         reply.type('text/html; charset=utf-8');
         return reply.send(adminIndex);
+      }
+    }
+    if (url.startsWith('/user') && config.userDistDir) {
+      const userIndex = readIndexHtml(config.userDistDir);
+      if (userIndex) {
+        reply.type('text/html; charset=utf-8');
+        return reply.send(userIndex);
       }
     }
     if (config.webDistDir) {

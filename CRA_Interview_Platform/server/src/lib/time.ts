@@ -44,7 +44,7 @@ export function formatCnFromIso(iso: string): string {
   return formatCn(new Date(iso));
 }
 
-/** 北京时间下的当天 00:00（UTC 时刻） */
+/** 北京时间下的当天 00:00 对应的 UTC 时刻 */
 export function startOfLocalDay(date: Date): Date {
   const cn = new Intl.DateTimeFormat('en-CA', {
     timeZone: TIMEZONE,
@@ -53,8 +53,9 @@ export function startOfLocalDay(date: Date): Date {
     day: '2-digit',
   }).format(date);
   const [y, m, d] = cn.split('-').map(Number);
-  // 按北京时间构造当天零点，再转 UTC 时刻
-  return new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1));
+  // Date.UTC(y, m-1, d) 是 "y-m-d 00:00 UTC"，即北京时间 y-m-d 08:00；
+  // 北京时间 y-m-d 00:00 需再减 8 小时（Asia/Shanghai 固定 UTC+8，无夏令时）。
+  return new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1) - 8 * 60 * 60 * 1000);
 }
 
 /** 北京时间下某天的 23:59:59.999（UTC 时刻） */

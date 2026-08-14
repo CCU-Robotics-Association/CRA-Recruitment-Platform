@@ -16,7 +16,17 @@ export interface AuthUser {
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: { sub: number; username: string; role: UserRole; tv: number };
+    // 管理端令牌携带 username/role/tv；用户端令牌携带 kind='user' 与候选人信息。
+    // 全部可选以兼容两类令牌的签发。
+    payload: {
+      sub?: number;
+      username?: string;
+      role?: UserRole;
+      tv?: number;
+      kind?: 'admin' | 'user';
+      name?: string;
+      studentNumber?: string;
+    };
     user: AuthUser;
   }
 }
@@ -26,6 +36,24 @@ export interface AuthTokenPayload {
   username: string;
   role: UserRole;
   tv: number;
+  kind?: 'admin' | 'user';
+}
+
+/** 用户端（候选人）令牌载荷：kind='user'，sub=applicationId */
+export interface UserTokenPayload {
+  sub: number;
+  kind: 'user';
+  name: string;
+  studentNumber: string;
+}
+
+/** 用户端认证通过后写入 request.user 的信息 */
+export interface UserAuthInfo {
+  id: number; // applicationId
+  kind: 'user';
+  name: string;
+  studentNumber: string;
+  phone: string;
 }
 
 /** 认证 preHandler：校验 token -> 用户存在且启用 -> token_version 匹配 */
@@ -38,6 +66,9 @@ export function buildAuthenticate(db: Db) {
     } catch {
       throw unauthorized();
     }
+
+    // 用户端令牌（kind='user'）不得访问管理端接口；旧令牌无 kind 字段时向下兼容
+    if (payload.kind && payload.kind !== 'admin') throw unauthorized();
 
     const row = db
       .prepare(
@@ -73,5 +104,40 @@ export function requireRole(...roles: UserRole[]) {
     if (!roles.includes(request.user.role)) {
       throw forbidden('当前账号没有权限执行该操作');
     }
+  };
+}
+
+/**
+ * 用户端（候选人）认证 preHandler：
+ * 校验 kind='user' 的令牌，sub=applicationId，报名记录存在即视为有效。
+ * 报名记录被删除后，对应令牌立即失效。
+ */
+export function buildUserAuthenticate(db: Db) {
+  return async function authenticateUser(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
+    let payload: UserTokenPayload;
+    try {
+      await request.jwtVerify();
+      payload = request.user as unknown as UserTokenPayload;
+    } catch {
+      throw unauthorized();
+    }
+
+    if (payload.kind !== 'user') throw unauthorized();
+
+    const row = db
+      .prepare('SELECT id, name, student_number, phone FROM applications WHERE id = ?')
+      .get(payload.sub) as
+      | { id: number; name: string; student_number: string; phone: string }
+      | undefined;
+
+    if (!row) throw unauthorized('报名记录不存在或已被删除');
+
+    request.user = {
+      id: row.id,
+      kind: 'user',
+      name: row.name,
+      studentNumber: row.student_number,
+      phone: row.phone,
+    } as unknown as AuthUser;
   };
 }

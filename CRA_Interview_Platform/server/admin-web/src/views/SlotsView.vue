@@ -10,6 +10,7 @@ const loading = ref(false);
 const slots = ref<Slot[]>([]);
 const rounds = ref<Round[]>([]);
 const roundId = ref<number>();
+const selectedSlots = ref<Slot[]>([]);
 
 const generateVisible = ref(false);
 const generateForm = reactive({
@@ -25,6 +26,69 @@ const generateForm = reactive({
 const editVisible = ref(false);
 const editingSlot = ref<Slot | null>(null);
 const editForm = reactive({ capacity: 1, isEnabled: true });
+
+const roundVisible = ref(false);
+const roundForm = reactive({
+  title: '',
+  description: '',
+  applyStartAt: null as Date | null,
+  applyEndAt: null as Date | null,
+  interviewStartAt: null as Date | null,
+  interviewEndAt: null as Date | null,
+  isOpen: true,
+});
+
+function resetRoundForm() {
+  roundForm.title = '';
+  roundForm.description = '';
+  roundForm.applyStartAt = null;
+  roundForm.applyEndAt = null;
+  roundForm.interviewStartAt = null;
+  roundForm.interviewEndAt = null;
+  roundForm.isOpen = true;
+}
+
+async function submitRound() {
+  if (!roundForm.title.trim()) {
+    ElMessage.warning('请填写轮次标题');
+    return;
+  }
+  if (!roundForm.applyStartAt || !roundForm.applyEndAt) {
+    ElMessage.warning('请选择报名开始与结束时间');
+    return;
+  }
+  if (roundForm.applyEndAt.getTime() <= roundForm.applyStartAt.getTime()) {
+    ElMessage.warning('报名结束时间必须晚于开始时间');
+    return;
+  }
+  if (
+    roundForm.interviewStartAt &&
+    roundForm.interviewEndAt &&
+    roundForm.interviewEndAt.getTime() <= roundForm.interviewStartAt.getTime()
+  ) {
+    ElMessage.warning('面试结束时间必须晚于开始时间');
+    return;
+  }
+  try {
+    const created = await api.post<Round>('/api/admin/rounds', {
+      title: roundForm.title.trim(),
+      description: roundForm.description.trim() || undefined,
+      applyStartAt: roundForm.applyStartAt.toISOString(),
+      applyEndAt: roundForm.applyEndAt.toISOString(),
+      interviewStartAt: roundForm.interviewStartAt ? roundForm.interviewStartAt.toISOString() : undefined,
+      interviewEndAt: roundForm.interviewEndAt ? roundForm.interviewEndAt.toISOString() : undefined,
+      isOpen: roundForm.isOpen,
+    });
+    ElMessage.success(`已创建轮次「${created.title}」，请为其生成面试时段`);
+    roundVisible.value = false;
+    resetRoundForm();
+    await loadRounds();
+    roundId.value = created.id;
+    await loadSlots();
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : '创建失败');
+  }
+}
 
 async function loadRounds() {
   const resp = await api.get<{ items: Round[] }>('/api/admin/rounds');
@@ -110,6 +174,51 @@ async function removeSlot(slot: Slot) {
   }
 }
 
+async function removeSelectedSlots() {
+  if (selectedSlots.value.length === 0) return;
+  await ElMessageBox.confirm(
+    `确定删除选中的 ${selectedSlots.value.length} 个时段吗？已有报名的时段会被跳过、不会删除。`,
+    '批量删除确认',
+    { type: 'warning' },
+  );
+  try {
+    const result = await api.post<{ deleted: number; failed: Array<{ id: number; reason: string }> }>(
+      '/api/admin/slots/batch-delete',
+      { ids: selectedSlots.value.map((s) => s.id) },
+    );
+    if (result.failed.length > 0) {
+      ElMessage.warning(
+        `已删除 ${result.deleted} 个，${result.failed.length} 个未删除（${result.failed.map((f) => `#${f.id} ${f.reason}`).join('；')}）`,
+      );
+    } else {
+      ElMessage.success(`已删除 ${result.deleted} 个时段`);
+    }
+    selectedSlots.value = [];
+    loadSlots();
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : '批量删除失败');
+  }
+}
+
+async function removeCurrentRound() {
+  if (!roundId.value) return;
+  const round = rounds.value.find((r) => r.id === roundId.value);
+  await ElMessageBox.confirm(
+    `确定删除招募轮次「${round?.title ?? roundId.value}」吗？该轮次下的所有面试时段将一并删除，且不可恢复。已有报名的轮次无法删除。`,
+    '删除轮次确认',
+    { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' },
+  );
+  try {
+    await api.delete(`/api/admin/rounds/${roundId.value}`);
+    ElMessage.success('轮次已删除');
+    selectedSlots.value = [];
+    await loadRounds();
+    await loadSlots();
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : '删除失败');
+  }
+}
+
 onMounted(async () => {
   await loadRounds();
   await loadSlots();
@@ -121,7 +230,15 @@ onMounted(async () => {
     <div class="page-header">
       <h2 class="page-title">面试时段</h2>
       <div>
+        <el-button :icon="Plus" @click="roundVisible = true">添加招募轮次</el-button>
         <el-button type="primary" :icon="Plus" @click="openGenerate">批量生成时段</el-button>
+        <el-button
+          type="danger"
+          :disabled="selectedSlots.length === 0"
+          @click="removeSelectedSlots"
+        >
+          批量删除{{ selectedSlots.length > 0 ? `（${selectedSlots.length}）` : '' }}
+        </el-button>
         <el-button :icon="Refresh" @click="loadSlots">刷新</el-button>
       </div>
     </div>
@@ -131,10 +248,14 @@ onMounted(async () => {
       <el-select v-model="roundId" style="width: 320px" @change="loadSlots">
         <el-option v-for="round in rounds" :key="round.id" :label="round.title" :value="round.id" />
       </el-select>
+      <el-button type="danger" plain :disabled="!roundId" @click="removeCurrentRound">
+        删除当前轮次
+      </el-button>
     </div>
 
     <el-card shadow="never">
-      <el-table v-loading="loading" :data="slots" stripe>
+      <el-table v-loading="loading" :data="slots" stripe @selection-change="(rows: Slot[]) => (selectedSlots = rows)">
+        <el-table-column type="selection" width="44" />
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column label="时段" min-width="200">
           <template #default="{ row }">{{ formatTimeRange(row.startsAt, row.endsAt) }}</template>
@@ -163,6 +284,36 @@ onMounted(async () => {
         </el-table-column>
       </el-table>
     </el-card>
+
+    <el-dialog v-model="roundVisible" title="添加招募轮次" width="520px" :close-on-click-modal="false">
+      <el-form label-width="110px">
+        <el-form-item label="轮次标题" required>
+          <el-input v-model="roundForm.title" maxlength="100" placeholder="如：2027 年春季招新" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="roundForm.description" type="textarea" :rows="2" maxlength="1000" placeholder="可选" />
+        </el-form-item>
+        <el-form-item label="报名开始" required>
+          <el-date-picker v-model="roundForm.applyStartAt" type="datetime" style="width: 100%" placeholder="选择报名开始时间" />
+        </el-form-item>
+        <el-form-item label="报名结束" required>
+          <el-date-picker v-model="roundForm.applyEndAt" type="datetime" style="width: 100%" placeholder="选择报名结束时间" />
+        </el-form-item>
+        <el-form-item label="面试开始">
+          <el-date-picker v-model="roundForm.interviewStartAt" type="datetime" style="width: 100%" placeholder="可选" />
+        </el-form-item>
+        <el-form-item label="面试结束">
+          <el-date-picker v-model="roundForm.interviewEndAt" type="datetime" style="width: 100%" placeholder="可选" />
+        </el-form-item>
+        <el-form-item label="开放报名">
+          <el-switch v-model="roundForm.isOpen" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="roundVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitRound">创建</el-button>
+      </template>
+    </el-dialog>
 
     <el-dialog v-model="generateVisible" title="批量生成面试时段" width="520px">
       <el-form label-width="110px">

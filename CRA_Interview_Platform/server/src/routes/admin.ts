@@ -17,15 +17,24 @@ import {
   getApplication,
   listApplications,
   listApplicationsForExport,
+  rescheduleApplication,
   reviewApplication,
 } from '../services/applicationService.ts';
-import { generateSlots, listSlotsWithBooked, updateSlot, deleteSlot } from '../services/slotService.ts';
+import {
+  getInterview,
+  listInterviews,
+  publishInterviewResult,
+  unpublishInterviewResult,
+  updateInterview,
+} from '../services/interviewService.ts';
+import { deleteSlotsBatch, generateSlots, listSlotsWithBooked, updateSlot, deleteSlot } from '../services/slotService.ts';
 import { getOverview } from '../services/statsService.ts';
-import { getRound } from '../services/roundService.ts';
-import type { ApplicationStatus, UserRole } from '../types.ts';
-import { APPLICATION_STATUSES } from '../types.ts';
+import { deleteRound, getRound } from '../services/roundService.ts';
+import type { ApplicationStatus, InterviewStatus, UserRole } from '../types.ts';
+import { APPLICATION_STATUSES, INTERVIEW_STATUSES } from '../types.ts';
 
 const STATUS_VALUES = APPLICATION_STATUSES as readonly string[];
+const INTERVIEW_STATUS_VALUES = INTERVIEW_STATUSES as readonly string[];
 const ROLE_VALUES = ['super_admin', 'admin', 'reviewer'] as const;
 
 export interface AdminContext {
@@ -36,6 +45,7 @@ export interface AdminContext {
 export function registerAdminRoutes(app: FastifyInstance, db: Db, ctx: AdminContext): void {
   registerAuthRoutes(app, db, ctx);
   registerApplicationRoutes(app, db, ctx);
+  registerInterviewRoutes(app, db, ctx);
   registerStatsRoutes(app, db, ctx);
   registerSlotRoutes(app, db, ctx);
   registerRoundRoutes(app, db, ctx);
@@ -260,6 +270,152 @@ function registerApplicationRoutes(app: FastifyInstance, db: Db, ctx: AdminConte
       });
     },
   );
+
+  // 调整候选人的面试时段（面试安排调整，需管理员权限）
+  const managerGuard = ctx.requireRole('super_admin', 'admin');
+  app.put<{ Params: { id: number }; Body: { slotId: number } }>(
+    '/api/admin/applications/:id/slot',
+    {
+      preHandler: [ctx.authenticate, managerGuard],
+      schema: {
+        params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+        body: {
+          type: 'object',
+          required: ['slotId'],
+          additionalProperties: false,
+          properties: { slotId: { type: 'integer', minimum: 1 } },
+        },
+      },
+    },
+    async (request) => {
+      const user = request.user as AuthUser;
+      const { id } = request.params;
+      return rescheduleApplication(db, id, user.id, user.displayName, request.body.slotId);
+    },
+  );
+}
+
+/* ---------------------------- 面试管理 ---------------------------- */
+
+/**
+ * 面试管理 API：管理端统一控制候选人的面试情况。
+ * - 查看/状态流转/评分评语/结果发布：reviewer+（与报名审核同权限）
+ * - 面试时段调整：见 /api/admin/applications/:id/slot（admin+）
+ */
+function registerInterviewRoutes(app: FastifyInstance, db: Db, ctx: AdminContext): void {
+  const viewerGuard = ctx.requireRole(...VIEWER_ROLES);
+  const preHandler = [ctx.authenticate, viewerGuard];
+
+  app.get(
+    '/api/admin/interviews',
+    {
+      preHandler,
+      schema: {
+        querystring: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            page: { type: 'integer', minimum: 1, default: 1 },
+            pageSize: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+            roundId: { type: 'integer', minimum: 1 },
+            status: { type: 'string', enum: INTERVIEW_STATUS_VALUES },
+            keyword: { type: 'string', maxLength: 100 },
+          },
+        },
+      },
+    },
+    async (request) => {
+      const q = request.query as {
+        page?: number;
+        pageSize?: number;
+        roundId?: number;
+        status?: InterviewStatus;
+        keyword?: string;
+      };
+      return listInterviews(db, {
+        roundId: q.roundId,
+        status: q.status,
+        keyword: q.keyword,
+        page: q.page ?? 1,
+        pageSize: q.pageSize ?? 20,
+      });
+    },
+  );
+
+  app.get(
+    '/api/admin/interviews/:id',
+    {
+      preHandler,
+      schema: {
+        params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      },
+    },
+    async (request) => {
+      const { id } = request.params as { id: number };
+      return getInterview(db, id);
+    },
+  );
+
+  app.patch<{
+    Params: { id: number };
+    Body: { status?: InterviewStatus; score?: number | null; comment?: string | null };
+  }>(
+    '/api/admin/interviews/:id',
+    {
+      preHandler,
+      schema: {
+        params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+        body: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            status: { type: 'string', enum: INTERVIEW_STATUS_VALUES },
+            score: { type: ['integer', 'null'], minimum: 0, maximum: 100 },
+            comment: { type: ['string', 'null'], maxLength: 2000 },
+          },
+        },
+      },
+    },
+    async (request) => {
+      const user = request.user as AuthUser;
+      const { id } = request.params;
+      return updateInterview(db, id, user.id, user.displayName, {
+        status: request.body.status,
+        score: request.body.score,
+        comment: request.body.comment,
+      });
+    },
+  );
+
+  app.post<{ Params: { id: number } }>(
+    '/api/admin/interviews/:id/publish-result',
+    {
+      preHandler,
+      schema: {
+        params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      },
+    },
+    async (request) => {
+      const user = request.user as AuthUser;
+      const { id } = request.params;
+      return publishInterviewResult(db, id, user.id, user.displayName);
+    },
+  );
+
+  app.post<{ Params: { id: number } }>(
+    '/api/admin/interviews/:id/unpublish-result',
+    {
+      preHandler,
+      schema: {
+        params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      },
+    },
+    async (request) => {
+      const user = request.user as AuthUser;
+      const { id } = request.params;
+      return unpublishInterviewResult(db, id, user.id, user.displayName);
+    },
+  );
 }
 
 /* ------------------------------ 统计 ------------------------------ */
@@ -368,6 +524,29 @@ function registerSlotRoutes(app: FastifyInstance, db: Db, ctx: AdminContext): vo
     async (request) => {
       const { id } = request.params;
       return updateSlot(db, id, request.body);
+    },
+  );
+
+  app.post<{
+    Body: { ids: number[] };
+  }>(
+    '/api/admin/slots/batch-delete',
+    {
+      preHandler,
+      schema: {
+        body: {
+          type: 'object',
+          required: ['ids'],
+          additionalProperties: false,
+          properties: {
+            ids: { type: 'array', minItems: 1, maxItems: 200, items: { type: 'integer', minimum: 1 } },
+          },
+        },
+      },
+    },
+    async (request) => {
+      // 批量删除：已有报名的时段跳过并返回原因，其余删除
+      return deleteSlotsBatch(db, request.body.ids);
     },
   );
 
@@ -520,6 +699,22 @@ function registerRoundRoutes(app: FastifyInstance, db: Db, ctx: AdminContext): v
         id,
       );
       return getRound(db, id);
+    },
+  );
+
+  app.delete<{ Params: { id: number } }>(
+    '/api/admin/rounds/:id',
+    {
+      preHandler,
+      schema: {
+        params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      },
+    },
+    async (request, reply) => {
+      const user = request.user as AuthUser;
+      const { id } = request.params;
+      deleteRound(db, id, user.id, user.displayName);
+      return reply.code(204).send();
     },
   );
 }
