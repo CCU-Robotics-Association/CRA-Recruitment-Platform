@@ -1,5 +1,4 @@
-/* Only soften the original architecture render; layout and interactions stay untouched. */
-.architecture-w::before {
+.robot-showcase-w::before {
   content: "";
   position: absolute;
   inset: 0 0 36rem;
