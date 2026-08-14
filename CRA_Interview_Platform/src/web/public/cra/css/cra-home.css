@@ -848,19 +848,28 @@ html.is-loaded .navlink:after {
 }
 
 @media screen and (min-width: 992px) {
-  .spirit-visual__shape01,
-  .spirit-visual__shape01-mask {
+  .spirit-visual__shape01 {
     clip-path: url(#spiritVisual01);
   }
 
-  .spirit-visual__shape02,
-  .spirit-visual__shape02-mask {
+  .spirit-visual__shape01-mask {
+    clip-path: url(#spiritMask01);
+  }
+
+  .spirit-visual__shape02 {
     clip-path: url(#spiritVisual02);
   }
 
-  .spirit-visual__shape03,
-  .spirit-visual__shape03-mask {
+  .spirit-visual__shape02-mask {
+    clip-path: url(#spiritMask02);
+  }
+
+  .spirit-visual__shape03 {
     clip-path: url(#spiritVisual03);
+  }
+
+  .spirit-visual__shape03-mask {
+    clip-path: url(#spiritMask03);
   }
 
   @supports (background: -webkit-named-image(i)) {
