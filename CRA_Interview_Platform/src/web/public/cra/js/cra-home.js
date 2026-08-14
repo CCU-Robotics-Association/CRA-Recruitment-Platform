@@ -122,7 +122,6 @@ class de extends s {
       i = document.querySelector(".burger__open").querySelectorAll("path"),
       n = document.querySelector(".burger__close").querySelectorAll("path"),
       r = document.querySelectorAll(".header_link"),
-      a = document.querySelector(".social-w"),
       o = document.querySelector(".footer__legal-w");
     ((this.tlMobileMenu = e
       .timeline({
@@ -154,16 +153,10 @@ class de extends s {
         ">-.8",
       )
       .fromTo(
-        a,
-        { xPercent: -10, opacity: 0 },
-        { xPercent: 0, opacity: 1 },
-        ">-.6",
-      )
-      .fromTo(
         o,
         { xPercent: -10, opacity: 0 },
         { xPercent: 0, opacity: 1 },
-        "<.1",
+        ">-.6",
       )),
       t.addEventListener("click", () => {
         (this.call("stop", null, "Scroll"),
@@ -384,22 +377,6 @@ const Pe = Object.freeze(
             ));
         }
       },
-      Backers: class extends s {
-        constructor(e) {
-          super(e);
-        }
-        init() {
-          this.updateBackers();
-        }
-        updateBackers() {
-          let t = parseInt(localStorage.getItem("backers")) || 100;
-          ((t += Math.floor(e.utils.random(1, 5))),
-            localStorage.setItem("backers", t),
-            (this.el.textContent = t.toLocaleString()));
-          const s = X.IS_DEV ? 6e4 : 36e5;
-          setTimeout(this.updateBackers.bind(this), s);
-        }
-      },
       Button: class extends s {
         constructor(e) {
           (super(e),
@@ -466,127 +443,6 @@ const Pe = Object.freeze(
           this.cancel();
         }
       },
-      Card: class extends s {
-        constructor(e) {
-          (super(e),
-            (this.defaults = {
-              element: ".projects__cl",
-              items: ".projects__item",
-              yDistance: 10,
-              repeat: !1,
-            }),
-            (this.options = { ...this.defaults, ...this.options }));
-        }
-        init() {
-          const e = document.querySelectorAll("[data-img-wrap]"),
-            t = document.querySelectorAll("[data-img]");
-          ((this.destroyFunctions = []),
-            e.forEach((e, s) => {
-              const i = (({ wrap: e, img: t }) => {
-                let s = 0,
-                  i = 0,
-                  n = 1,
-                  r = s,
-                  a = i,
-                  o = n,
-                  l = !1;
-                const h = (e, t, s) => e * (1 - s) + t * s;
-                function c() {
-                  ((l = !0),
-                    (r = h(r, s, 0.12)),
-                    (a = h(a, i, 0.12)),
-                    (o = h(o, n, 0.12)),
-                    (t.style.transform = `scale(${o}) rotateY(${2 * r}deg) rotateX(${2 * -a}deg)`),
-                    Math.abs(r.toFixed(2)) !== Math.abs(s.toFixed(2)) ||
-                    Math.abs(a.toFixed(2)) !== Math.abs(i.toFixed(2)) ||
-                    Math.abs(o.toFixed(2)) !== Math.abs(n.toFixed(2))
-                      ? requestAnimationFrame(c)
-                      : (l = !1));
-                }
-                const d = () => {
-                    l || c();
-                  },
-                  u = (t) => {
-                    const r = e.getBoundingClientRect();
-                    ((s = (t.clientX - r.left) / r.width),
-                      (i = (t.clientY - r.top) / r.height),
-                      (s = 2 * s - 1),
-                      (i = 2 * i - 1),
-                      (n = 1.02),
-                      d());
-                  },
-                  m = (e) => {
-                    ((s = 0), (i = 0), (n = 1), d());
-                  };
-                return (
-                  e.addEventListener("mouseover", u),
-                  e.addEventListener("mouseleave", m),
-                  e.addEventListener("mousemove", u),
-                  () => {
-                    (e.removeEventListener("mouseover", u),
-                      e.removeEventListener("mouseleave", m),
-                      e.removeEventListener("mousemove", u));
-                  }
-                );
-              })({ wrap: e, img: t[s] });
-              this.destroyFunctions.push(i);
-            }),
-            this.createChildRefs().layout().enable());
-        }
-        createChildRefs() {
-          return (
-            (this.element = document.querySelector(this.options.element)),
-            (this.items =
-              this.element.querySelectorAll(`${this.options.items}`) || []),
-            this
-          );
-        }
-        layout() {
-          return (
-            this.items.length &&
-              e.set(this.items, {
-                opacity: 0,
-                rotation: 0.01,
-                yPercent: this.options.yDistance,
-                filter: "blur(2rem)",
-              }),
-            this
-          );
-        }
-        enable() {
-          return (this.items.length && this.animate(), this);
-        }
-        animate() {
-          (e.defaults({ ease: "power2.out", duration: 0.6 }),
-            a.batch(this.items, {
-              onEnter: (t) =>
-                e.to(t, {
-                  opacity: 1,
-                  yPercent: 0,
-                  filter: "blur(0px)",
-                  stagger: { each: 0.15, grid: [1, 3], from: "start" },
-                  overwrite: !0,
-                }),
-              ...(this.options.repeat && {
-                onLeave: (t) => e.set(t, { opacity: 0, y: -30, overwrite: !0 }),
-                onEnterBack: (t) =>
-                  e.to(t, { opacity: 1, y: 0, stagger: 0.15, overwrite: !0 }),
-                onLeaveBack: (t) =>
-                  e.set(t, {
-                    opacity: 0,
-                    y: this.options.yDistance,
-                    overwrite: !0,
-                  }),
-              }),
-            }),
-            a.addEventListener("refreshInit", () =>
-              e.set(this.items, { y: 0 }),
-            ));
-        }
-        destroy() {
-          this.destroyFunctions.forEach((e) => e());
-        }
-      },
       Carousel: class extends s {
         constructor(t) {
           (super(t),
@@ -601,143 +457,26 @@ const Pe = Object.freeze(
             e.set(".swiper-w", { overflow: "visible" }));
         }
         init() {
-          let e = {};
-          switch (this.type) {
-            case "projects":
-              e = ((
-                {
-                  modules: e,
-                  $prevButton: t,
-                  $nextButton: s,
-                  $pagination: i,
-                  updateCallback: n,
-                } = {
-                  modules: [],
-                  $pagination: null,
-                  updateCallback: () => {
-                    console.log("updateCallback");
-                  },
-                },
-              ) => ({
-                modules: e,
-                speed: 800,
-                a11y: !0,
-                centeredSlides: !1,
-                slidesPerView: "auto",
-                navigation: { nextEl: s, prevEl: t },
-                allowTouchMove: !1,
-                breakpoints: {
-                  480: { slidesPerView: 1.2 },
-                  991: { slidesPerView: 2 },
-                },
-                on: { init: n, breakpoint: n, destroy: n },
-              }))({
-                modules: [d, m, u],
-                $prevButton: this.$prevButton,
-                $nextButton: this.$nextButton,
-              });
-              break;
-            case "gallery":
-              e = ((
-                {
-                  modules: e,
-                  $prevButton: t,
-                  $nextButton: s,
-                  $pagination: i,
-                  updateCallback: n,
-                } = {
-                  modules: [],
-                  $pagination: null,
-                  updateCallback: () => {
-                    console.log("updateCallback");
-                  },
-                },
-              ) => ({
-                modules: e,
-                speed: 800,
-                a11y: !0,
-                centeredSlides: !1,
-                slidesPerView: "auto",
-                navigation: { nextEl: s, prevEl: t },
-                allowTouchMove: !1,
-                slidePerGroup: 1,
-                breakpoints: {
-                  480: { slidesPerView: 1 },
-                  991: { slidesPerView: 2 },
-                },
-                on: { init: n, breakpoint: n, destroy: n },
-              }))({
-                modules: [d, m, u],
-                $prevButton: this.$prevButton,
-                $nextButton: this.$nextButton,
-              });
-              break;
-            case "community":
-              e = ((
-                {
-                  modules: e,
-                  $prevButton: t,
-                  $nextButton: s,
-                  $pagination: i,
-                  updateCallback: n,
-                } = {
-                  modules: [],
-                  $pagination: null,
-                  updateCallback: () => {},
-                },
-              ) => ({
-                modules: e,
-                speed: 600,
-                loop: !0,
-                a11y: !0,
-                slidesPerView: 1,
-                navigation: { nextEl: s, prevEl: t },
-                effect: "fade",
-                on: { init: n, breakpoint: n, destroy: n },
-              }))({
-                modules: [m, d, u, p],
-                $prevButton: this.$prevButton,
-                $nextButton: this.$nextButton,
-              });
-              break;
-            default:
-              e = ((
-                {
-                  modules: e,
-                  $prevButton: t,
-                  $nextButton: s,
-                  updateCallback: i,
-                } = {
-                  modules: [],
-                  $prevButton: null,
-                  $nextButton: null,
-                  updateCallback: () => {},
-                },
-              ) => ({
-                modules: e,
-                speed: 400,
-                loop: !1,
-                spaceBetween: 10,
-                a11y: !0,
-                slidesPerView: 1.1,
-                navigation: { prevEl: t, nextEl: s },
-                breakpoints: {
-                  700: { slidesPerView: 2.2, spaceBetween: 20 },
-                  1e3: { slidesPerView: 3.2 },
-                },
-                on: { init: i, breakpoint: i, destroy: i },
-              }))({
-                modules: [d, u],
-                $prevButton: this.$prevButton,
-                $nextButton: this.$nextButton,
-              });
-          }
-          if (this.length > 1) {
-            if ("gallery" === this.type && !ce) return;
-            if ("projects" === this.type && !ce) return;
-            ((this.carousel = new c(this.$container, e)),
-              this.carousel.on("progress", this.onProgress));
-          }
+          if ("gallery" !== this.type || this.length <= 1 || !ce) return;
+          const e = {
+            modules: [d, m, u],
+            speed: 800,
+            a11y: !0,
+            centeredSlides: !1,
+            slidesPerView: "auto",
+            navigation: {
+              nextEl: this.$nextButton,
+              prevEl: this.$prevButton,
+            },
+            allowTouchMove: !1,
+            slidePerGroup: 1,
+            breakpoints: {
+              480: { slidesPerView: 1 },
+              991: { slidesPerView: 2 },
+            },
+          };
+          ((this.carousel = new c(this.$container, e)),
+            this.carousel.on("progress", this.onProgress));
         }
         prev() {
           this.carousel.slideTo(this.carousel.realIndex);
@@ -754,24 +493,6 @@ const Pe = Object.freeze(
         destroy() {
           var e;
           (super.destroy(), null == (e = this.carousel) || e.destroy(!0, !0));
-        }
-      },
-      Countdown: class extends s {
-        constructor(e) {
-          super(e);
-        }
-        init() {
-          this.updateCountdown();
-        }
-        updateCountdown() {
-          const e = new Date(),
-            t = new Date(e.getFullYear(), 0, 1),
-            s = 365 - Math.floor((e - t) / 864e5);
-          document.getElementById("countdown").textContent = s;
-          const i = new Date();
-          i.setHours(24, 0, 0, 0);
-          const n = i - e;
-          setTimeout(this.updateCountdown, n);
         }
       },
       Cursor: class extends s {
@@ -913,105 +634,6 @@ const Pe = Object.freeze(
         }
         destroy() {
           window.removeEventListener("resize", this.bindResize);
-        }
-      },
-      FadeinText: class extends s {
-        constructor(e) {
-          (super(e),
-            (this.onResizeEndBind = this.onResizeEnd.bind(this)),
-            (this.onFadeinTextProgressBind =
-              this.onFadeinTextProgress.bind(this)),
-            (this.$el = this.el),
-            (this.$content = this.$("content")[0]),
-            (this.windowWidth = window.innerWidth),
-            (this.charsCount = 0),
-            (this.progress = 0),
-            (this.baseColor =
-              getComputedStyle(this.$el).getPropertyValue("--base-color") ||
-              "#bfc9dc"));
-        }
-        init() {
-          (this.bindEvents(),
-            Le(J.EAGER).then((e) => this.onFontsLoaded(e)),
-            (this.timelineMain = e.timeline({ paused: !0 })));
-        }
-        destroy() {
-          (super.destroy(), this.unbindEvents());
-        }
-        bindEvents() {
-          (window.addEventListener(Z.RESIZE_END, this.onResizeEndBind),
-            window.addEventListener(
-              "fadeinTextProgress",
-              this.onFadeinTextProgressBind,
-            ));
-        }
-        unbindEvents() {
-          (window.removeEventListener(Z.RESIZE_END, this.onResizeEndBind),
-            window.removeEventListener(
-              "fadeinTextProgress",
-              this.onFadeinTextProgressBind,
-            ));
-        }
-        onResizeEnd() {
-          this.windowWidth != window.innerWidth &&
-            0 != this.split.length &&
-            ((this.windowWidth = window.innerWidth),
-            this.split.revert(),
-            this.timelineMain.clear(),
-            requestAnimationFrame(() => {
-              (this.splitText(),
-                this.initMainTimeline(),
-                this.computeProgress());
-            }));
-        }
-        onFontsLoaded(e) {
-          document.fonts.ready.then(() => {
-            (this.splitText(), this.initMainTimeline(), this.computeProgress());
-          });
-        }
-        onFadeinTextProgress(e) {
-          const { target: t, progress: s } = e.detail;
-          this.el.contains(t) &&
-            this.split &&
-            ((this.progress = s), this.computeProgress());
-        }
-        initMainTimeline() {
-          this.timelineMain.from(this.split.chars, {
-            color: this.baseColor,
-            stagger: 0.06,
-          });
-        }
-        splitText() {
-          ((this.split = new h(this.$content, {
-            type: "lines, words, chars",
-            linesClass: "fadein-text_line",
-            wordsClass: "fadein-text_word",
-            charsClass: "fadein-text_char",
-          })),
-            this.$content.querySelectorAll(".fadein-text_line").forEach((e) => {
-              e.style.display = "inline";
-            }),
-            this.$content.querySelectorAll(".fadein-text_word").forEach((e) => {
-              e.style.display = "inline";
-            }),
-            this.$content.querySelectorAll(".fadein-text_char").forEach((e) => {
-              e.style.display = "inline";
-            }));
-        }
-        computeProgress() {
-          var e, t;
-          if (
-            (null ==
-              (t = null == (e = this.timelineMain) ? void 0 : e.progress) ||
-              t.call(e, this.progress || 0),
-            this.progress > 0)
-          ) {
-            if (this.$el.classList.contains("is-active")) return;
-            this.$el.classList.add("is-active");
-          } else {
-            if (!this.$el.classList.contains("is-active")) return;
-            this.$el.classList.remove("is-active");
-          }
         }
       },
       Header: de,
@@ -1428,32 +1050,9 @@ const Pe = Object.freeze(
               (this.call("destroy", t, "app"), this.call("update", s, "app"));
             }),
             this.load.on("ready", (e, t) => {
-              (document.documentElement.setAttribute(
-                "lang",
-                ae.dataset.wfLocale,
-              ),
+              (document.documentElement.setAttribute("lang", "zh-CN"),
                 window.gl.add());
             }));
-        }
-      },
-      Money: class extends s {
-        constructor(e) {
-          super(e);
-        }
-        init() {
-          this.updateMoney();
-        }
-        updateMoney() {
-          let t = parseInt(localStorage.getItem("money")) || 7e6;
-          ((t += Math.floor(e.utils.random(1e4, 5e4))),
-            localStorage.setItem("money", t),
-            (this.el.textContent = new Intl.NumberFormat("en-GB", {
-              style: "currency",
-              currency: "GBP",
-              maximumFractionDigits: 0,
-            }).format(t)));
-          const s = X.IS_DEV ? 6e4 : 36e5;
-          setTimeout(this.updateMoney.bind(this), s);
         }
       },
       Mouse: class extends s {
@@ -1779,47 +1378,7 @@ const Pe = Object.freeze(
             }),
             (this.spiritOutTl = e
               .timeline({ defaults: { duration: 4, ease: se } })
-              .to(".spirit-visual__mask-w", { opacity: 1 }, "<")
-              .from(
-                ".cube._1",
-                { marginLeft: "23rem", marginTop: "18rem" },
-                "<",
-              )
-              .from(
-                ".cube._2",
-                { marginLeft: "43rem", marginTop: "-13rem" },
-                "<",
-              )
-              .from(
-                ".cube._3",
-                { marginLeft: "31rem", marginTop: "-20rem" },
-                "<",
-              )
-              .from(
-                ".cube._4",
-                { marginLeft: "-8rem", marginTop: "-9.3rem" },
-                "<",
-              )
-              .from(
-                ".cube._5",
-                { marginLeft: "-19.9rem", marginTop: "-16.2rem" },
-                "<",
-              )
-              .from(
-                ".cube._6",
-                { marginLeft: "-14rem", marginTop: "-6rem" },
-                "<",
-              )
-              .from(
-                ".cube._7",
-                { marginLeft: "-40rem", marginTop: "20.3rem" },
-                "<",
-              )
-              .from(
-                ".cube._8",
-                { marginLeft: "-46rem", marginTop: "10rem" },
-                "<",
-              )),
+              .to(".spirit-visual__mask-w", { opacity: 1 }, "<")),
             a.create({
               trigger: "#join-us",
               start: "0% 0%",
@@ -1856,47 +1415,7 @@ const Pe = Object.freeze(
               .to(".association-spirit-w", {
                 clipPath: "inset(0% 8rem 58rem round 0rem 0rem 2.4rem 2.4rem",
               })
-              .to(".spirit-visual__mask-w", { opacity: 1 }, "<")
-              .from(
-                ".cube._1",
-                { marginLeft: "23rem", marginTop: "18rem" },
-                "<",
-              )
-              .from(
-                ".cube._2",
-                { marginLeft: "43rem", marginTop: "-13rem" },
-                "<",
-              )
-              .from(
-                ".cube._3",
-                { marginLeft: "31rem", marginTop: "-20rem" },
-                "<",
-              )
-              .from(
-                ".cube._4",
-                { marginLeft: "-8rem", marginTop: "-9.3rem" },
-                "<",
-              )
-              .from(
-                ".cube._5",
-                { marginLeft: "-19.9rem", marginTop: "-16.2rem" },
-                "<",
-              )
-              .from(
-                ".cube._6",
-                { marginLeft: "-14rem", marginTop: "-6rem" },
-                "<",
-              )
-              .from(
-                ".cube._7",
-                { marginLeft: "-40rem", marginTop: "20.3rem" },
-                "<",
-              )
-              .from(
-                ".cube._8",
-                { marginLeft: "-46rem", marginTop: "10rem" },
-                "<",
-              )),
+              .to(".spirit-visual__mask-w", { opacity: 1 }, "<")),
             a.create({
               trigger: "#join-us",
               start: "0% 0%",
@@ -3442,8 +2961,6 @@ if (ce) {
   document.querySelectorAll("[data-scroll-speed]").forEach((e) => {
     $(e).removeAttr("data-scroll-speed");
   });
-  document.querySelector(".community__left").removeAttribute("data-carousel");
-  document.querySelector(".community__right").removeAttribute("data-carousel");
 }
 function Ue() {
   var e;
