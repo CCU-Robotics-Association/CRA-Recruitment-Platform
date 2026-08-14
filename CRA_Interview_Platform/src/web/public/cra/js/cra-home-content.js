@@ -4,7 +4,7 @@
     event.stopImmediatePropagation();
     window.location.assign("/apply");
   };
-
+ 
   document.querySelectorAll("[data-cra-registration]").forEach((link) => {
     link.addEventListener("click", openRegistration, true);
   });
