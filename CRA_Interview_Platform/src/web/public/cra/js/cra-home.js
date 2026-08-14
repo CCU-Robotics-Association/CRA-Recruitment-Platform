@@ -1491,6 +1491,14 @@ class Ce {
         alpha: !0,
         precision: "lowp",
       })),
+      this.instance.domElement.addEventListener(
+        "webglcontextlost",
+        (event) => {
+          event.preventDefault();
+          enableGlFallback("context-lost");
+        },
+        { once: !0 },
+      ),
       this.instance.setPixelRatio(this.gl.sizes.pixelRatio),
       this.instance.setSize(this.gl.sizes.width, this.gl.sizes.height));
   }
@@ -2781,6 +2789,10 @@ class De {
       document.body.appendChild(this.stats.dom));
   }
 }
+function enableGlFallback(reason) {
+  document.documentElement.classList.add("gl-fallback");
+  if (reason) document.documentElement.dataset.glFallback = reason;
+}
 class $e {
   constructor() {
     ((this.gl = new Ie()),
@@ -2788,6 +2800,10 @@ class $e {
       (this.ready = new Promise((resolve) => {
         this.loadingManager.onLoad = resolve;
       })),
+      (this.loadingManager.onError = (url) => {
+        enableGlFallback("asset-error");
+        console.warn("WebGL asset failed to load:", url);
+      }),
       (this.rgbeLoader = new U(this.loadingManager)),
       (this.gltfLoader = new F(this.loadingManager)),
       (this.models = { tree: null }),
@@ -2849,6 +2865,11 @@ class $e {
     ((this.videosDOM = {
       robotShowcase: { reveal: document.querySelector(".gl-reveal-video") },
     }),
+      this.videosDOM.robotShowcase.reveal.addEventListener(
+        "error",
+        () => enableGlFallback("video-error"),
+        { once: !0 },
+      ),
       (this.videos = {
         robotShowcase: { reveal: new j(this.videosDOM.robotShowcase.reveal) },
       }),
@@ -3057,9 +3078,25 @@ function je() {
 }
 Y.isWebGL2Available()
   ? ((Ne = new Ie({ canvas: "canvas.gl" })),
-    Promise.all([Ne.load(), je()]).then(() => {
-      (qe(), Ne.init());
-    }))
+    (() => {
+      let settled = !1;
+      const fail = (reason) => {
+        if (settled) return;
+        settled = !0;
+        enableGlFallback(reason);
+        qe();
+      };
+      const timeout = window.setTimeout(() => fail("load-timeout"), 15000);
+      Promise.all([Ne.load(), je()])
+        .then(() => {
+          if (settled) return;
+          settled = !0;
+          window.clearTimeout(timeout);
+          if (document.documentElement.classList.contains("gl-fallback")) qe();
+          else (qe(), Ne.init());
+        })
+        .catch(() => fail("initialization-error"));
+    })())
   : (document.documentElement.classList.add("gl-fallback"),
     je().then(() => {
       qe();
