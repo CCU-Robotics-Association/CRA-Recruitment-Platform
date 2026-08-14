@@ -14,7 +14,7 @@ import {
   A as u,
   P as m,
   E as p,
-  e as g, 
+  e as g,
   W as f,
   V as v,
   M as w,
@@ -890,28 +890,18 @@ const Pe = Object.freeze(
       },
       Intro: class extends s {
         constructor(e) {
-          (super(e),
-            (this.$el = this.el),
-            (this.heroTitle01ML =
-              0.8 *
-              parseInt(
-                $(".hero__title-w._01").css("margin-left").replace("px", ""),
-              )),
-            (this.heroTitle02ML =
-              2 *
-              parseInt(
-                $(".hero__title-w._02").css("margin-left").replace("px", ""),
-              )),
-            (this.heroTitle03ML =
-              1.1 *
-              parseInt(
-                $(".hero__title-w._03").css("margin-left").replace("px", ""),
-              )),
-            (this.heroTitle04ML =
-              0.9 *
-              parseInt(
-                $(".hero__title-w._04").css("margin-left").replace("px", ""),
-              )));
+          super(e);
+          const readMarginLeft = (selector) => {
+            const element = document.querySelector(selector);
+            return element
+              ? Number.parseFloat(window.getComputedStyle(element).marginLeft) || 0
+              : 0;
+          };
+          ((this.$el = this.el),
+            (this.heroTitle01ML = 0.8 * readMarginLeft(".hero__title-w._01")),
+            (this.heroTitle02ML = 2 * readMarginLeft(".hero__title-w._02")),
+            (this.heroTitle03ML = 1.1 * readMarginLeft(".hero__title-w._03")),
+            (this.heroTitle04ML = 0.9 * readMarginLeft(".hero__title-w._04")));
         }
         init() {
           Le(J.EAGER).then((e) => this.onFontsLoaded(e));
@@ -925,11 +915,18 @@ const Pe = Object.freeze(
           const t = document.querySelectorAll(".hero__title");
           let s = document.querySelectorAll(".hero__desc"),
             i = document.querySelectorAll(".hero__subtitle");
-          (new h(s, { type: "lines", linesClass: "single-line" }),
-            $(".hero__desc .single-line").wrapInner(
-              '<div class="single-line-inner">',
-            ));
-          let n = $(s).find(".single-line-inner");
+          new h(s, { type: "lines", linesClass: "single-line" });
+          document
+            .querySelectorAll(".hero__desc .single-line")
+            .forEach((line) => {
+              const inner = document.createElement("div");
+              inner.className = "single-line-inner";
+              while (line.firstChild) inner.append(line.firstChild);
+              line.append(inner);
+            });
+          let n = document.querySelectorAll(
+            ".hero__desc .single-line-inner",
+          );
           const r = () => {
             const t = e.timeline({ defaults: { ease: re, duration: ee } });
             return (
@@ -1121,7 +1118,7 @@ const Pe = Object.freeze(
                 duration: 1.2,
                 ease: re,
                 onComplete: () => {
-                  $("body").attr("data-theme", "light");
+                  document.body.setAttribute("data-theme", "light");
                 },
               },
               "-=0.2",
@@ -1214,7 +1211,7 @@ const Pe = Object.freeze(
               },
             })),
             (this.scrollbar = document.querySelector("[data-scrollbar]")),
-            $(this.scrollbar).hasClass("active")
+            this.scrollbar.classList.contains("active")
               ? this.customScrollbar(!0)
               : this.customScrollbar());
         }
@@ -1287,7 +1284,7 @@ const Pe = Object.freeze(
           this.locomotiveScroll.start();
         }
         customScrollbar(t) {
-          (t && a.killAll(), $(this.scrollbar).addClass("active"));
+          (t && a.killAll(), this.scrollbar.classList.add("active"));
           let s = this.scrollbar.getBoundingClientRect().height,
             i = document.querySelector(
               "[data-scrollbar] [data-scrollbar-thumb]",
@@ -1297,11 +1294,9 @@ const Pe = Object.freeze(
               .querySelector("[data-module-scroll]")
               .getBoundingClientRect().height,
             l = this.locomotiveScroll,
-            h = document.querySelector("[data-module-scroll]");
-          ($(h).height(),
-            document.querySelector(
-              '[data-scrollbar-thumb-height="variable"]',
-            ) && (e.set(i, { height: (s / o) * s }), (r = (s / o) * s)));
+            h = this.scrollbar;
+          document.querySelector('[data-scrollbar-thumb-height="variable"]') &&
+            (e.set(i, { height: (s / o) * s }), (r = (s / o) * s));
           let c = e.to(i, {
             y: s - r,
             ease: "none",
@@ -1314,13 +1309,13 @@ const Pe = Object.freeze(
             onDrag() {
               let t = e.utils.normalize(this.minY, this.maxY, this.y);
               (l.scrollTo((o - s) * t, { immediate: !0 }),
-                $(this.scrollbar).attr("data-scrollbar-drag", "true"));
+                h.setAttribute("data-scrollbar-drag", "true"));
             },
             onRelease() {
               let t = e.utils.normalize(this.minY, this.maxY, this.y);
               (c.scrollTrigger.enable(),
                 c.progress(t),
-                $(this.scrollbar).attr("data-scrollbar-drag", "false"));
+                h.setAttribute("data-scrollbar-drag", "false"));
             },
           });
         }
@@ -2959,14 +2954,12 @@ const Oe = new H({ modules: Pe });
 if (ce) {
   ae.classList.add("is-mobile");
   document.querySelectorAll("[data-scroll-speed]").forEach((e) => {
-    $(e).removeAttr("data-scroll-speed");
+    e.removeAttribute("data-scroll-speed");
   });
 }
 function Ue() {
-  var e;
   (history.scrollRestoration &&
     ((history.scrollRestoration = "manual"), window.scrollTo(0, 0)),
-    null == (e = document.getElementById("designerStyles")) || e.remove(),
     (function () {
       const e = new CustomEvent(Z.RESIZE_END);
       (window.addEventListener(
