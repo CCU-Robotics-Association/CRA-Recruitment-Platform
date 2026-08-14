@@ -457,8 +457,27 @@ a { color: inherit; text-decoration: none; }
   top: 156px;
   right: max(28px, calc(50% - 620px));
   width: clamp(220px, 19vw, 300px);
+  height: calc(100vh - 156px - 20px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   color: #252525;
   font-family: "FZ Old Mincho", "Songti SC", serif;
+}
+.candidate-appointment-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(37, 37, 37, .28) transparent;
+}
+.candidate-appointment-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.candidate-appointment-scroll::-webkit-scrollbar-thumb {
+  background: rgba(37, 37, 37, .28);
+  border-radius: 4px;
 }
 .candidate-appointment-heading {
   display: flex;
@@ -483,6 +502,108 @@ a { color: inherit; text-decoration: none; }
   font-weight: 400;
   line-height: 1.2;
   white-space: nowrap;
+}
+.candidate-appointment-calendar {
+  margin: 14px 0 0;
+  border: 1px solid rgba(37, 37, 37, .38);
+  font-family: "Source Han Serif SC Input", "Noto Serif SC", serif;
+}
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(37, 37, 37, .38);
+}
+.calendar-nav__btn {
+  border: none;
+  background: none;
+  padding: 0 6px;
+  font-size: 16px;
+  line-height: 1;
+  color: #252525;
+  cursor: pointer;
+  font-family: inherit;
+}
+.calendar-nav__btn:hover {
+  color: #b76a74;
+}
+.calendar-nav__title {
+  font-size: 13px;
+  color: #252525;
+  white-space: nowrap;
+}
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid rgba(37, 37, 37, .38);
+}
+.calendar-weekdays > span {
+  padding: 4px 0;
+  text-align: center;
+  font-size: 10px;
+  color: #6b6b6b;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+.calendar-day {
+  position: relative;
+  min-height: 32px;
+  border: none;
+  border-right: 1px solid rgba(37, 37, 37, .12);
+  border-bottom: 1px solid rgba(37, 37, 37, .12);
+  background: #f0efeb;
+  padding: 0;
+  font-family: "Source Han Serif SC Input", "Noto Serif SC", serif;
+  font-size: 12px;
+  color: #252525;
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease;
+}
+.calendar-day:nth-child(7n) {
+  border-right: none;
+}
+.calendar-day.has-slots {
+  background: #fbf7ef;
+  font-weight: 600;
+}
+.calendar-day:hover:not(:disabled):not(.is-empty) {
+  background: rgba(183, 106, 116, .14);
+}
+.calendar-day.is-selected {
+  background: #b76a74;
+  color: #fff;
+}
+.calendar-day:disabled {
+  color: #b8b3ab;
+  cursor: default;
+}
+.calendar-day.is-empty {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+.calendar-day__badge {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  font-size: 9px;
+  line-height: 1;
+  color: #b76a74;
+}
+.calendar-day.is-selected .calendar-day__badge {
+  color: #fff;
+}
+.calendar-empty {
+  padding: 16px 0;
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 12px;
+  color: #909399;
+  border-right: 1px solid rgba(37, 37, 37, .38);
+  border-bottom: 1px solid rgba(37, 37, 37, .38);
 }
 .candidate-appointment-slots {
   display: grid;
@@ -529,9 +650,9 @@ a { color: inherit; text-decoration: none; }
 }
 .candidate-confirm-registration {
   display: flex;
+  flex: 0 0 auto;
   width: 100%;
   min-height: 64px;
-  margin-top: 160px;
   align-items: center;
   justify-content: center;
   border: 1px solid #b76a74;
