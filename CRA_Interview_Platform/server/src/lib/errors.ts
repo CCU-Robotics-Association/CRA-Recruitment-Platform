@@ -1,8 +1,3 @@
-/**
- * 统一业务错误。所有服务层抛出的错误都映射为 HTTP 响应中的
- * { error: { code, message, details? } } 结构。
- */
-
 export class AppError extends Error {
   readonly statusCode: number;
   readonly code: string;
@@ -39,4 +34,8 @@ export function conflict(message: string, details?: unknown): AppError {
 
 export function tooMany(message = '请求过于频繁，请稍后再试'): AppError {
   return new AppError(429, 'TOO_MANY_REQUESTS', message);
+}
+
+export function serviceUnavailable(message = '服务繁忙，请稍后重试'): AppError {
+  return new AppError(503, 'SERVICE_UNAVAILABLE', message);
 }

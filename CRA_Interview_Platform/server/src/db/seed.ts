@@ -28,7 +28,7 @@ export function buildDefaultSlots(day: Date, durationMinutes: number, count: num
   });
 }
 
-export function seed(db: Db): SeedResult {
+export async function seed(db: Db): Promise<SeedResult> {
   const result: SeedResult = { adminCreated: false, roundCreated: false, slotsCreated: 0 };
 
   // 1. 默认管理员
@@ -36,14 +36,18 @@ export function seed(db: Db): SeedResult {
   if (userCount === 0) {
     const { username, password, displayName } = config.bootstrapAdmin;
     const now = nowIso();
+    const passwordHash = await hashPassword(password);
     db.prepare(
       `INSERT INTO users (username, password_hash, display_name, role, is_active, created_at, updated_at)
        VALUES (?, ?, ?, 'super_admin', 1, ?, ?)`,
-    ).run(username, hashPassword(password), displayName, now, now);
+    ).run(username, passwordHash, displayName, now, now);
     result.adminCreated = true;
   }
 
-  // 2. 默认轮次（仅当没有轮次时）
+  // 2. 演示轮次仅用于本地开发；生产空库绝不能自动开放一场虚构招募。
+  if (!config.seedDemoData) return result;
+
+  // 默认轮次（仅当没有轮次时）
   const roundCount = (db.prepare('SELECT COUNT(*) AS c FROM recruitment_rounds').get() as { c: number }).c;
   if (roundCount === 0) {
     const now = nowIso();

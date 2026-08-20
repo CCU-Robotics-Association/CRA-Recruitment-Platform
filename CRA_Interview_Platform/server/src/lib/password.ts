@@ -1,41 +1,154 @@
-/**
- * 密码哈希：Node 内置 scrypt（无原生依赖，安全强度可调）。
- * 存储格式：scrypt$N$r$p$saltB64$hashB64
- */
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
+import { config } from '../config.ts';
+import { AppError, serviceUnavailable } from './errors.ts';
 
-const N = 16384;
+const N = 32768;
 const R = 8;
-const P = 1;
+const P = 3;
 const KEY_LEN = 64;
 const SALT_LEN = 16;
+const MAX_MEMORY = 128 * 1024 * 1024;
 const PREFIX = 'scrypt';
 
-export function hashPassword(plain: string): string {
+type ParsedPasswordHash = {
+  n: number;
+  r: number;
+  p: number;
+  salt: Buffer;
+  expected: Buffer;
+};
+
+let activePasswordTasks = 0;
+const waitingPasswordTasks: Array<() => void> = [];
+
+async function acquirePasswordWorker(): Promise<void> {
+  if (activePasswordTasks < config.passwordConcurrency) {
+    activePasswordTasks += 1;
+    return;
+  }
+  if (waitingPasswordTasks.length >= config.passwordQueueLimit) {
+    throw serviceUnavailable('登录或报名请求过多，请稍后重试');
+  }
+  await new Promise<void>((resolve) => waitingPasswordTasks.push(resolve));
+}
+
+function releasePasswordWorker(): void {
+  const next = waitingPasswordTasks.shift();
+  if (next) next();
+  else activePasswordTasks -= 1;
+}
+
+async function runPasswordTask<T>(task: () => Promise<T>): Promise<T> {
+  await acquirePasswordWorker();
+  try {
+    return await task();
+  } finally {
+    releasePasswordWorker();
+  }
+}
+
+export function isCandidatePasswordValid(plain: string): boolean {
+  return (
+    plain.length >= 8 &&
+    plain.length <= 32 &&
+    /[A-Za-z]/.test(plain) &&
+    /\d/.test(plain)
+  );
+}
+
+function deriveKey(
+  plain: string,
+  salt: Buffer,
+  keyLength: number,
+  params: Pick<ParsedPasswordHash, 'n' | 'r' | 'p'>,
+): Promise<Buffer> {
+  return runPasswordTask(
+    () => new Promise((resolve, reject) => {
+      scrypt(
+        plain,
+        salt,
+        keyLength,
+        { N: params.n, r: params.r, p: params.p, maxmem: MAX_MEMORY },
+        (error, derived) => {
+          if (error) reject(error);
+          else resolve(derived);
+        },
+      );
+    }),
+  );
+}
+
+function parsePasswordHash(stored: string): ParsedPasswordHash | null {
+  const parts = stored.split('$');
+  if (parts.length !== 6 || parts[0] !== PREFIX) return null;
+
+  const [, nText, rText, pText, saltText, hashText] = parts;
+  const n = Number(nText);
+  const r = Number(rText);
+  const p = Number(pText);
+  if (
+    !Number.isSafeInteger(n) ||
+    !Number.isSafeInteger(r) ||
+    !Number.isSafeInteger(p) ||
+    n < 2 ||
+    n > 1_048_576 ||
+    (n & (n - 1)) !== 0 ||
+    r < 1 ||
+    r > 32 ||
+    p < 1 ||
+    p > 16
+  ) {
+    return null;
+  }
+
+  try {
+    const salt = Buffer.from(saltText ?? '', 'base64');
+    const expected = Buffer.from(hashText ?? '', 'base64');
+    if (salt.length < 16 || salt.length > 64 || expected.length < 32 || expected.length > 128) {
+      return null;
+    }
+    return { n, r, p, salt, expected };
+  } catch {
+    return null;
+  }
+}
+
+export async function hashPassword(plain: string): Promise<string> {
   const salt = randomBytes(SALT_LEN);
-  const derived = scryptSync(plain, salt, KEY_LEN, { N, r: R, p: P, maxmem: 64 * 1024 * 1024 });
+  const derived = await deriveKey(plain, salt, KEY_LEN, { n: N, r: R, p: P });
   return `${PREFIX}$${N}$${R}$${P}$${salt.toString('base64')}$${derived.toString('base64')}`;
 }
 
-export function verifyPassword(plain: string, stored: string): boolean {
-  const parts = stored.split('$');
-  if (parts.length !== 6 || parts[0] !== PREFIX) return false;
-  const [, nStr, rStr, pStr, saltB64, hashB64] = parts;
-  const n = Number.parseInt(nStr ?? '', 10);
-  const r = Number.parseInt(rStr ?? '', 10);
-  const p = Number.parseInt(pStr ?? '', 10);
-  if (!Number.isFinite(n) || !Number.isFinite(r) || !Number.isFinite(p)) return false;
+export async function verifyPassword(plain: string, stored: string): Promise<boolean> {
+  const parsed = parsePasswordHash(stored);
+  if (!parsed) return false;
 
-  let salt: Buffer;
-  let expected: Buffer;
   try {
-    salt = Buffer.from(saltB64 ?? '', 'base64');
-    expected = Buffer.from(hashB64 ?? '', 'base64');
-  } catch {
+    const derived = await deriveKey(plain, parsed.salt, parsed.expected.length, parsed);
+    return timingSafeEqual(derived, parsed.expected);
+  } catch (error) {
+    if (error instanceof AppError) throw error;
     return false;
   }
-  if (salt.length === 0 || expected.length === 0) return false;
+}
 
-  const derived = scryptSync(plain, salt, expected.length, { N: n, r, p, maxmem: 64 * 1024 * 1024 });
-  return timingSafeEqual(derived, expected);
+export function needsPasswordRehash(stored: string): boolean {
+  const parsed = parsePasswordHash(stored);
+  return (
+    !parsed ||
+    parsed.n !== N ||
+    parsed.r !== R ||
+    parsed.p !== P ||
+    parsed.expected.length !== KEY_LEN
+  );
+}
+
+let dummyPasswordHash: Promise<string> | undefined;
+
+export function getDummyPasswordHash(): Promise<string> {
+  dummyPasswordHash ??= hashPassword(randomBytes(32).toString('base64url')).catch((error: unknown) => {
+    dummyPasswordHash = undefined;
+    throw error;
+  });
+  return dummyPasswordHash;
 }

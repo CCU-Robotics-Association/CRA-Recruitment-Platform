@@ -1,57 +1,29 @@
-/** 管理端 API 数据类型 */
+export type UserRole = 'super_admin' | 'admin' | 'reviewer';
 
-export interface Slot {
-  id: number;
-  roundId: number;
-  startsAt: string;
-  endsAt: string;
-  capacity: number;
-  isEnabled: number;
-  createdAt: string;
-  booked: number;
-  remaining: number;
-}
+export type ApplicationStatus =
+  | 'submitted'
+  | 'under_review'
+  | 'approved'
+  | 'rejected'
+  | 'waitlisted';
 
-export interface Application {
+export const COLLEGE_VALUES = ['计算机科学技术学院', '电子信息工程学院', '数学与统计学院'] as const;
+export type College = (typeof COLLEGE_VALUES)[number];
+
+export interface UserRow {
   id: number;
-  roundId: number;
-  slotId: number | null;
-  name: string;
-  studentNumber: string;
-  gender: 'male' | 'female' | 'other' | null;
-  college: string | null;
-  className: string | null;
-  email: string;
-  phone: string;
-  answers: Record<string, string>;
+  username: string;
+  passwordHash: string;
+  displayName: string;
+  role: UserRole;
+  isActive: number;
+  tokenVersion: number;
+  lastLoginAt: string | null;
   createdAt: string;
   updatedAt: string;
-  slot?: { id: number; startsAt: string; endsAt: string } | null;
 }
 
-export interface ApplicationListResponse {
-  items: Application[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
-
-export interface StatsOverview {
-  total: number;
-  todayNew: number;
-  todayNewAt: string;
-  slotOccupancy: Array<{
-    slotId: number;
-    startsAt: string;
-    endsAt: string;
-    capacity: number;
-    booked: number;
-    remaining: number;
-  }>;
-  recent: Array<{ id: number; name: string; studentNumber: string; createdAt: string }>;
-}
-
-export interface Round {
+export interface RoundRow {
   id: number;
   title: string;
   description: string;
@@ -62,61 +34,56 @@ export interface Round {
   isOpen: number;
   createdAt: string;
   updatedAt: string;
-  applicationCount?: number;
-  slotCount?: number;
 }
 
-export interface AdminUserRow {
+export interface SlotRow {
   id: number;
-  username: string;
-  displayName: string;
-  role: 'super_admin' | 'admin' | 'reviewer';
-  isActive: number;
-  lastLoginAt: string | null;
+  roundId: number;
+  startsAt: string;
+  endsAt: string;
+  capacity: number;
+  isEnabled: number;
+  createdAt: string;
+}
+
+export interface ApplicationRow {
+  id: number;
+  roundId: number;
+  slotId: number | null;
+  name: string;
+  studentNumber: string;
+  gender: 'male' | 'female' | 'other' | null;
+  college: string | null;
+  className: string | null;
+  email: string;
+  phone: string;
+  answers: string; 
+  queryCode: string;
+  status: ApplicationStatus;
+  reviewNote: string | null;
+  reviewedBy: number | null;
+  reviewedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-/** 北京时间格式化工具 */
-export function formatCn(iso: string | null | undefined, withSeconds = false): string {
-  if (!iso) return '-';
-  const date = new Date(iso);
-  const parts = new Intl.DateTimeFormat('zh-CN', {
-    timeZone: 'Asia/Shanghai',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: withSeconds ? '2-digit' : undefined,
-    hour12: false,
-  }).format(date);
-  return parts.replace(/\//g, '-');
-}
-
-export function formatDateOnly(iso: string | null | undefined): string {
-  if (!iso) return '-';
-  return new Intl.DateTimeFormat('zh-CN', {
-    timeZone: 'Asia/Shanghai',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-    .format(new Date(iso))
-    .replace(/\//g, '-');
-}
-
-export function formatTimeRange(startsAt: string, endsAt: string): string {
-  const fmt = (iso: string) =>
-    new Intl.DateTimeFormat('zh-CN', {
-      timeZone: 'Asia/Shanghai',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    })
-      .format(new Date(iso))
-      .replace(/\//g, '-');
-  return `${fmt(startsAt)} – ${fmt(endsAt)}`;
+export interface PublicMetaResponse {
+  round: {
+    id: number;
+    title: string;
+    description: string;
+    applyStartAt: string;
+    applyEndAt: string;
+    isOpen: boolean;
+    applyPhase: 'not_started' | 'open' | 'ended';
+  };
+  slots: Array<{
+    id: number;
+    startsAt: string;
+    endsAt: string;
+    capacity: number;
+    booked: number;
+    remaining: number;
+    available: boolean;
+  }>;
 }

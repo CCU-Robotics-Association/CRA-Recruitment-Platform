@@ -1,11 +1,8 @@
-/**
- * 服务入口：启动 HTTP 服务，处理优雅关闭。
- */
 import { buildApp } from './app.ts';
 import { config } from './config.ts';
 
 async function main(): Promise<void> {
-  const { app, db, bootSummary } = await buildApp();
+  const { app, bootSummary } = await buildApp();
 
   if (bootSummary.migrationsApplied.length > 0) {
     app.log.info(`已应用数据库迁移: ${bootSummary.migrationsApplied.join(', ')}`);
@@ -22,14 +19,28 @@ async function main(): Promise<void> {
     app.log.info(`已创建默认招募轮次及 ${bootSummary.slotsCreated} 个面试时段`);
   }
 
+  let closing = false;
   const close = async (signal: string) => {
+    if (closing) {
+      app.log.warn(`再次收到 ${signal}，服务已在关闭中`);
+      return;
+    }
+    closing = true;
     app.log.info(`收到 ${signal}，正在优雅关闭…`);
+    const forcedExit = setTimeout(() => {
+      app.log.fatal('优雅关闭超过 30 秒，强制退出');
+      process.exit(1);
+    }, 30_000);
+    forcedExit.unref();
     try {
       await app.close();
-    } finally {
-      db.close();
+      clearTimeout(forcedExit);
+      process.exitCode = 0;
+    } catch (error) {
+      clearTimeout(forcedExit);
+      app.log.error({ err: error }, '关闭服务失败');
+      process.exitCode = 1;
     }
-    process.exit(0);
   };
   process.on('SIGINT', () => void close('SIGINT'));
   process.on('SIGTERM', () => void close('SIGTERM'));
@@ -38,7 +49,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  // 启动失败必须立刻失败退出，避免进程空转
   console.error('服务启动失败:', err);
   process.exit(1);
 });

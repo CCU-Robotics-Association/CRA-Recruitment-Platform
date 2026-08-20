@@ -3,12 +3,9 @@
  */
 import type { Db } from '../lib/db.ts';
 import { endOfLocalDay, nowIso, startOfLocalDay, TIMEZONE } from '../lib/time.ts';
-import type { ApplicationStatus } from '../types.ts';
-import { APPLICATION_STATUS_LABELS, APPLICATION_STATUSES } from '../types.ts';
 
 export interface StatsOverview {
   total: number;
-  byStatus: Array<{ status: ApplicationStatus; label: string; count: number }>;
   todayNew: number;
   todayNewAt: string;
   slotOccupancy: Array<{
@@ -23,23 +20,12 @@ export interface StatsOverview {
     id: number;
     name: string;
     studentNumber: string;
-    status: ApplicationStatus;
     createdAt: string;
   }>;
 }
 
 export function getOverview(db: Db): StatsOverview {
   const total = (db.prepare('SELECT COUNT(*) AS c FROM applications').get() as { c: number }).c;
-
-  const statusRows = db
-    .prepare('SELECT status, COUNT(*) AS c FROM applications GROUP BY status')
-    .all() as Array<{ status: ApplicationStatus; c: number }>;
-  const byStatusMap = new Map(statusRows.map((r) => [r.status, r.c]));
-  const byStatus = APPLICATION_STATUSES.map((status) => ({
-    status,
-    label: APPLICATION_STATUS_LABELS[status],
-    count: byStatusMap.get(status) ?? 0,
-  }));
 
   const now = new Date();
   const todayStart = startOfLocalDay(now).toISOString();
@@ -77,19 +63,17 @@ export function getOverview(db: Db): StatsOverview {
 
   const recent = db
     .prepare(
-      'SELECT id, name, student_number, status, created_at FROM applications ORDER BY created_at DESC, id DESC LIMIT 8',
+      'SELECT id, name, student_number, created_at FROM applications ORDER BY created_at DESC, id DESC LIMIT 8',
     )
     .all() as Array<{
     id: number;
     name: string;
     student_number: string;
-    status: ApplicationStatus;
     created_at: string;
   }>;
 
   return {
     total,
-    byStatus,
     todayNew,
     todayNewAt: nowIso(),
     slotOccupancy,
@@ -97,7 +81,6 @@ export function getOverview(db: Db): StatsOverview {
       id: r.id,
       name: r.name,
       studentNumber: r.student_number,
-      status: r.status,
       createdAt: r.created_at,
     })),
   };
