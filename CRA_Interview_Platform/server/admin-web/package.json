@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "CRA 在线面试平台管理端",
+  "description": "CRA 面试报名在线平台管理端",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
