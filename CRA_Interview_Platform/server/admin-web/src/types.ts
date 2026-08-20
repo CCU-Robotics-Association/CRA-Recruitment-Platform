@@ -1,98 +1,5 @@
 /** 管理端 API 数据类型 */
 
-export type ApplicationStatus = 'submitted' | 'under_review' | 'approved' | 'rejected' | 'waitlisted';
-
-export type InterviewStatus = 'pending' | 'completed' | 'no_show' | 'passed' | 'failed' | 'waitlisted';
-
-export const INTERVIEW_STATUS_LABELS: Record<InterviewStatus, string> = {
-  pending: '待面试',
-  completed: '已面试',
-  no_show: '未到场',
-  passed: '通过',
-  failed: '不通过',
-  waitlisted: '候补',
-};
-
-export const INTERVIEW_STATUS_TYPES: Record<
-  InterviewStatus,
-  'info' | 'warning' | 'success' | 'danger' | 'primary'
-> = {
-  pending: 'info',
-  completed: 'warning',
-  no_show: 'danger',
-  passed: 'success',
-  failed: 'danger',
-  waitlisted: 'primary',
-};
-
-export interface InterviewListItem {
-  applicationId: number;
-  roundId: number;
-  roundTitle: string;
-  name: string;
-  studentNumber: string;
-  phone: string;
-  email: string;
-  appliedAt: string;
-  slot: { id: number; startsAt: string; endsAt: string } | null;
-  interview: {
-    id: number | null;
-    status: InterviewStatus;
-    score: number | null;
-    comment: string | null;
-    resultPublished: boolean;
-    resultPublishedAt: string | null;
-    updatedAt: string | null;
-  };
-}
-
-export interface InterviewListResponse {
-  items: InterviewListItem[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
-
-export interface InterviewDetail {
-  id: number;
-  applicationId: number;
-  status: InterviewStatus;
-  score: number | null;
-  comment: string | null;
-  resultPublished: boolean;
-  resultPublishedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  application: {
-    id: number;
-    roundId: number;
-    roundTitle: string;
-    name: string;
-    studentNumber: string;
-    email: string;
-    phone: string;
-    applicationStatus: ApplicationStatus;
-    appliedAt: string;
-    slot: { id: number; startsAt: string; endsAt: string } | null;
-  };
-}
-
-export const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  submitted: '已报名',
-  under_review: '审核中',
-  approved: '已通过',
-  rejected: '已淘汰',
-  waitlisted: '候补',
-};
-
-export const STATUS_TYPES: Record<ApplicationStatus, 'info' | 'warning' | 'success' | 'danger' | 'primary'> = {
-  submitted: 'info',
-  under_review: 'warning',
-  approved: 'success',
-  rejected: 'danger',
-  waitlisted: 'primary',
-};
-
 export interface Slot {
   id: number;
   roundId: number;
@@ -111,17 +18,14 @@ export interface Application {
   slotId: number | null;
   name: string;
   studentNumber: string;
+  gender: 'male' | 'female' | 'other' | null;
+  college: string | null;
+  className: string | null;
   email: string;
   phone: string;
   answers: Record<string, string>;
-  queryCode: string;
-  status: ApplicationStatus;
-  reviewNote: string | null;
-  reviewedBy: number | null;
-  reviewedAt: string | null;
   createdAt: string;
   updatedAt: string;
-  reviewedByName?: string | null;
   slot?: { id: number; startsAt: string; endsAt: string } | null;
 }
 
@@ -134,7 +38,6 @@ export interface ApplicationListResponse {
 
 export interface StatsOverview {
   total: number;
-  byStatus: Array<{ status: ApplicationStatus; label: string; count: number }>;
   todayNew: number;
   todayNewAt: string;
   slotOccupancy: Array<{
@@ -145,7 +48,7 @@ export interface StatsOverview {
     booked: number;
     remaining: number;
   }>;
-  recent: Array<{ id: number; name: string; studentNumber: string; status: ApplicationStatus; createdAt: string }>;
+  recent: Array<{ id: number; name: string; studentNumber: string; createdAt: string }>;
 }
 
 export interface Round {

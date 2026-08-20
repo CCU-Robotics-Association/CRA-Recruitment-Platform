@@ -1,6 +1,35 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import {
+  ElAlert,
+  ElButton,
+  ElCard,
+  ElDialog,
+  ElForm,
+  ElFormItem,
+  ElInput,
+  ElMessage,
+  ElMessageBox,
+  ElOption,
+  ElSelect,
+  ElTable,
+  ElTableColumn,
+  ElTag,
+} from 'element-plus';
+import 'element-plus/es/components/alert/style/css';
+import 'element-plus/es/components/button/style/css';
+import 'element-plus/es/components/card/style/css';
+import 'element-plus/es/components/dialog/style/css';
+import 'element-plus/es/components/form/style/css';
+import 'element-plus/es/components/form-item/style/css';
+import 'element-plus/es/components/input/style/css';
+import 'element-plus/es/components/message/style/css';
+import 'element-plus/es/components/message-box/style/css';
+import 'element-plus/es/components/option/style/css';
+import 'element-plus/es/components/select/style/css';
+import 'element-plus/es/components/table/style/css';
+import 'element-plus/es/components/table-column/style/css';
+import 'element-plus/es/components/tag/style/css';
 import { Plus, Refresh, Key, CircleClose } from '@element-plus/icons-vue';
 import { api } from '../api';
 import { authStore } from '../auth';
@@ -15,6 +44,10 @@ const roleLabels: Record<string, string> = {
 
 const loading = ref(false);
 const users = ref<AdminUserRow[]>([]);
+
+function asAdminUser(row: unknown): AdminUserRow {
+  return row as AdminUserRow;
+}
 
 const createVisible = ref(false);
 const createForm = reactive({ username: '', password: '', displayName: '', role: 'reviewer' });
@@ -100,7 +133,7 @@ onMounted(load);
     </div>
 
     <el-card shadow="never">
-      <el-table v-loading="loading" :data="users" stripe>
+      <el-table :class="{ 'admin-loading': loading }" :aria-busy="loading" :data="users" stripe>
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="username" label="用户名" width="160" />
         <el-table-column prop="displayName" label="显示名称" min-width="140" />
@@ -121,14 +154,14 @@ onMounted(load);
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" type="primary" link :icon="Key" @click="openReset(row)">重置密码</el-button>
+            <el-button size="small" type="primary" link :icon="Key" @click="openReset(asAdminUser(row))">重置密码</el-button>
             <el-button
               size="small"
               :type="row.isActive ? 'danger' : 'success'"
               link
               :icon="row.isActive ? CircleClose : undefined"
               :disabled="row.id === authStore.user?.id"
-              @click="toggleActive(row)"
+              @click="toggleActive(asAdminUser(row))"
             >
               {{ row.isActive ? '停用' : '启用' }}
             </el-button>
@@ -150,7 +183,7 @@ onMounted(load);
         </el-form-item>
         <el-form-item label="角色">
           <el-select v-model="createForm.role" style="width: 100%">
-            <el-option label="面试官（查看+审核）" value="reviewer" />
+            <el-option label="只读查看员" value="reviewer" />
             <el-option label="管理员（+时段/轮次配置）" value="admin" />
             <el-option label="超级管理员（全部权限）" value="super_admin" />
           </el-select>

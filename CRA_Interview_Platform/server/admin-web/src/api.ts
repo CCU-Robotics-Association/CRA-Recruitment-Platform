@@ -1,6 +1,3 @@
-/**
- * 管理端 API 客户端：统一鉴权头、错误解析、401 跳转。
- */
 import { authStore } from './auth';
 
 export class ApiError extends Error {
@@ -35,23 +32,25 @@ function buildUrl(path: string, query?: RequestOptions['query']): string {
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const method = (options.method ?? 'GET').toUpperCase();
   const headers: Record<string, string> = {};
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
-  if (authStore.token) headers.Authorization = `Bearer ${authStore.token}`;
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && authStore.csrfToken) {
+    headers['X-CSRF-Token'] = authStore.csrfToken;
+  }
 
   const response = await fetch(buildUrl(path, options.query), {
-    method: options.method ?? 'GET',
+    method,
     headers,
+    credentials: 'same-origin',
+    cache: method === 'GET' ? 'no-store' : 'default',
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
 
   if (response.status === 401) {
-    // 登录态失效：清理并跳转登录页（生产托管在 /admin/ 前缀下）
     authStore.clear();
     const loginPath = `${import.meta.env.DEV ? '' : '/admin'}/login`;
-    if (window.location.pathname !== loginPath) {
-      window.location.href = loginPath;
-    }
+    if (window.location.pathname !== loginPath) window.location.href = loginPath;
     throw new ApiError(401, 'UNAUTHORIZED', '登录已过期，请重新登录');
   }
 

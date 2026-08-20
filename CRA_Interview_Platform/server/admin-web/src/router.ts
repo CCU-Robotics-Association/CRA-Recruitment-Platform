@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authStore } from './auth';
 
-// 生产构建产物托管在 /admin/ 下；开发模式由 vite dev server 直接服务根路径
 const historyBase = import.meta.env.DEV ? '/' : '/admin/';
 
 export const router = createRouter({
@@ -30,12 +29,6 @@ export const router = createRouter({
           meta: { title: '报名管理' },
         },
         {
-          path: 'interviews',
-          name: 'interviews',
-          component: () => import('./views/InterviewsView.vue'),
-          meta: { title: '面试管理' },
-        },
-        {
           path: 'slots',
           name: 'slots',
           component: () => import('./views/SlotsView.vue'),
@@ -57,11 +50,19 @@ export const router = createRouter({
   ],
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   document.title = `${String(to.meta.title ?? '管理端')} · CRA`;
+
+  if ((to.name === 'login' || !to.meta.public) && !authStore.initialized) {
+    await authStore.restore();
+  }
   if (!to.meta.public && !authStore.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } };
   }
+  if (to.name === 'login' && authStore.isAuthenticated) {
+    return { name: 'dashboard' };
+  }
+
   const requiredRoles = to.meta.role as string[] | undefined;
   if (requiredRoles && authStore.user && !requiredRoles.includes(authStore.user.role)) {
     return { name: 'dashboard' };

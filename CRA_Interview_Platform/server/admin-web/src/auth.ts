@@ -1,6 +1,3 @@
-/**
- * 登录态：token 持久化到 localStorage，用户信息内存缓存。
- */
 import { reactive } from 'vue';
 
 export interface AdminUser {
@@ -10,23 +7,16 @@ export interface AdminUser {
   role: 'super_admin' | 'admin' | 'reviewer';
 }
 
-const TOKEN_KEY = 'cra_admin_token';
-const USER_KEY = 'cra_admin_user';
-
-function readUser(): AdminUser | null {
-  try {
-    const raw = localStorage.getItem(USER_KEY);
-    return raw ? (JSON.parse(raw) as AdminUser) : null;
-  } catch {
-    return null;
-  }
-}
+const LEGACY_STORAGE_KEYS = ['cra_admin_token', 'cra_admin_user'];
+let restorePromise: Promise<boolean> | null = null;
 
 export const authStore = reactive({
-  token: localStorage.getItem(TOKEN_KEY) ?? '',
-  user: readUser(),
+  user: null as AdminUser | null,
+  csrfToken: '',
+  initialized: false,
+
   get isAuthenticated(): boolean {
-    return Boolean(this.token);
+    return Boolean(this.user);
   },
   get isSuperAdmin(): boolean {
     return this.user?.role === 'super_admin';
@@ -34,16 +24,54 @@ export const authStore = reactive({
   get canManage(): boolean {
     return this.user?.role === 'super_admin' || this.user?.role === 'admin';
   },
-  set(token: string, user: AdminUser) {
-    this.token = token;
+
+  set(user: AdminUser, csrfToken: string) {
     this.user = user;
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    this.csrfToken = csrfToken;
+    this.initialized = true;
+    clearLegacyStorage();
   },
+
   clear() {
-    this.token = '';
     this.user = null;
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    this.csrfToken = '';
+    this.initialized = true;
+    clearLegacyStorage();
+  },
+
+  async restore(): Promise<boolean> {
+    if (this.initialized) return this.isAuthenticated;
+    if (restorePromise) return restorePromise;
+
+    restorePromise = (async () => {
+      try {
+        const response = await fetch('/api/admin/auth/me', {
+          credentials: 'same-origin',
+          cache: 'no-store',
+        });
+        if (!response.ok) {
+          this.clear();
+          return false;
+        }
+        const body = (await response.json()) as { csrfToken: string; user: AdminUser };
+        this.set(body.user, body.csrfToken);
+        return true;
+      } catch {
+        this.clear();
+        return false;
+      } finally {
+        this.initialized = true;
+        restorePromise = null;
+      }
+    })();
+
+    return restorePromise;
   },
 });
+
+function clearLegacyStorage(): void {
+  try {
+    for (const key of LEGACY_STORAGE_KEYS) window.localStorage.removeItem(key);
+  } catch {
+  }
+}

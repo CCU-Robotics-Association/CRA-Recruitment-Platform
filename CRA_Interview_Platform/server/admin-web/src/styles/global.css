@@ -53,3 +53,29 @@ body,
 .mono {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 }
+
+.admin-loading {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.admin-native-field {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  padding: 0 10px;
+  color: #303133;
+  background: #fff;
+  font: inherit;
+}
+
+.admin-native-field:focus {
+  border-color: #409eff;
+  outline: none;
+}
+
+.admin-native-field--time {
+  width: calc(50% - 18px);
+}

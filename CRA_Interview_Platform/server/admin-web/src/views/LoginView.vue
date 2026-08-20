@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
+import { ElButton, ElCard, ElForm, ElFormItem, ElInput, ElMessage } from 'element-plus';
+import 'element-plus/es/components/button/style/css';
+import 'element-plus/es/components/card/style/css';
+import 'element-plus/es/components/form/style/css';
+import 'element-plus/es/components/form-item/style/css';
+import 'element-plus/es/components/input/style/css';
+import 'element-plus/es/components/message/style/css';
 import { api } from '../api';
 import { authStore } from '../auth';
 import type { AdminUser } from '../auth';
@@ -19,11 +25,11 @@ async function handleLogin() {
   }
   loading.value = true;
   try {
-    const resp = await api.post<{ token: string; expiresIn: number; user: AdminUser }>(
+    const resp = await api.post<{ expiresIn: number; csrfToken: string; user: AdminUser }>(
       '/api/admin/auth/login',
       form,
     );
-    authStore.set(resp.token, resp.user);
+    authStore.set(resp.user, resp.csrfToken);
     ElMessage.success(`欢迎回来，${resp.user.displayName}`);
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/';
     router.push(redirect);

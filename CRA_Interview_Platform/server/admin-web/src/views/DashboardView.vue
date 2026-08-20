@@ -1,11 +1,30 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
+import {
+  ElButton,
+  ElCard,
+  ElCol,
+  ElIcon,
+  ElMessage,
+  ElProgress,
+  ElRow,
+  ElTable,
+  ElTableColumn,
+} from 'element-plus';
+import 'element-plus/es/components/button/style/css';
+import 'element-plus/es/components/card/style/css';
+import 'element-plus/es/components/col/style/css';
+import 'element-plus/es/components/icon/style/css';
+import 'element-plus/es/components/message/style/css';
+import 'element-plus/es/components/progress/style/css';
+import 'element-plus/es/components/row/style/css';
+import 'element-plus/es/components/table/style/css';
+import 'element-plus/es/components/table-column/style/css';
 import { User, Tickets, Clock, TrendCharts } from '@element-plus/icons-vue';
 import { api } from '../api';
 import type { StatsOverview } from '../types';
-import { STATUS_LABELS, STATUS_TYPES, formatCn, formatTimeRange } from '../types';
+import { formatCn, formatTimeRange } from '../types';
 
 const router = useRouter();
 const loading = ref(false);
@@ -31,7 +50,7 @@ onMounted(load);
 </script>
 
 <template>
-  <div class="admin-page" v-loading="loading">
+  <div class="admin-page" :class="{ 'admin-loading': loading }" :aria-busy="loading">
     <div class="page-header">
       <h2 class="page-title">仪表盘</h2>
       <el-button :icon="TrendCharts" @click="load">刷新</el-button>
@@ -57,7 +76,7 @@ onMounted(load);
       <el-col :span="6">
         <el-card class="stat-card" shadow="hover">
           <div class="stat-label" style="color: #909399; font-size: 14px">
-            <el-icon><Clock /></el-icon> 面试时段
+            <el-icon><Clock /></el-icon> 报名时段
           </div>
           <div class="stat-value" style="color: #e6a23c">{{ totalSlots }}</div>
         </el-card>
@@ -73,24 +92,7 @@ onMounted(load);
     </el-row>
 
     <el-row :gutter="16" style="margin-top: 16px">
-      <el-col :span="10">
-        <el-card shadow="never">
-          <template #header>报名状态分布</template>
-          <div v-if="stats">
-            <div v-for="item in stats.byStatus" :key="item.status" style="margin-bottom: 12px">
-              <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px">
-                <span>{{ item.label }}</span>
-                <span>{{ item.count }}</span>
-              </div>
-              <el-progress
-                :percentage="stats.total ? Math.round((item.count / stats.total) * 100) : 0"
-                :status="item.count > 0 ? STATUS_TYPES[item.status] : undefined"
-              />
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="14">
+      <el-col :span="24">
         <el-card shadow="never">
           <template #header>时段占用（前 12 个）</template>
           <div v-if="stats">
@@ -117,13 +119,6 @@ onMounted(load);
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="name" label="姓名" width="120" />
         <el-table-column prop="studentNumber" label="学号" width="130" />
-        <el-table-column label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="STATUS_TYPES[row.status as keyof typeof STATUS_TYPES]" size="small">
-              {{ STATUS_LABELS[row.status as keyof typeof STATUS_LABELS] }}
-            </el-tag>
-          </template>
-        </el-table-column>
         <el-table-column label="报名时间">
           <template #default="{ row }">{{ formatCn(row.createdAt) }}</template>
         </el-table-column>
