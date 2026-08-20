@@ -1,5 +1,3 @@
-/** 管理端 API 数据类型 */
-
 export interface Slot {
   id: number;
   roundId: number;
@@ -77,7 +75,6 @@ export interface AdminUserRow {
   updatedAt: string;
 }
 
-/** 北京时间格式化工具 */
 export function formatCn(iso: string | null | undefined, withSeconds = false): string {
   if (!iso) return '-';
   const date = new Date(iso);
