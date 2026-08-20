@@ -1,0 +1,11 @@
+[Unit]
+Description=Check CRA Recruitment readiness every minute
+
+[Timer]
+OnBootSec=2m
+OnUnitActiveSec=1m
+AccuracySec=10s
+Unit=cra-healthcheck.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=CRA Recruitment SQLite Backup
+After=cra-recruitment.service
+
+[Service]
+Type=oneshot
+User=cra-recruitment
+Group=cra-recruitment
+WorkingDirectory=/opt/cra-recruitment/server
+EnvironmentFile=/opt/cra-recruitment/server/.env.production
+ExecStart=/usr/bin/npm run backup
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/cra-recruitment

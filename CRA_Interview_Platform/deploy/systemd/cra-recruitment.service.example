@@ -1,0 +1,26 @@
+[Unit]
+Description=CRA Recruitment Platform
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=cra-recruitment
+Group=cra-recruitment
+WorkingDirectory=/opt/cra-recruitment/server
+EnvironmentFile=/opt/cra-recruitment/server/.env.production
+ExecStartPre=/usr/bin/npm run preflight:production
+ExecStart=/usr/bin/npm run start:production
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=35s
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/cra-recruitment
+
+[Install]
+WantedBy=multi-user.target
