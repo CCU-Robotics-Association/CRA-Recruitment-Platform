@@ -6,11 +6,12 @@
     <meta name="description" content="长春大学机器人协会 CRA 2026 招新、机器人展示与线上报名平台。">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <link href="css/cra-base.css?v=20260814-2" rel="stylesheet" type="text/css">
-    <link href="css/cra-layout.css?v=20260814-2" rel="stylesheet" type="text/css">
+    <link href="css/cra-layout.css?v=20260815-1" rel="stylesheet" type="text/css">
     <link href="/cra/assets/icons/cra-favicon-32.png" rel="icon" type="image/png">
     <link href="/cra/assets/icons/cra-apple-touch-icon-256.png" rel="apple-touch-icon">
     <meta name="HandheldFriendly" content="true">
-    <link id="mainStyles" crossorigin="anonymous" referrerpolicy="no-referrer" rel="stylesheet" href="css/cra-home.css?v=20260814-4" media="all" onload="this.media='all'; this.onload=null; this.isLoaded=true">
+    <script defer src="js/cra-boot-guard.js?v=20260818-2"></script>
+    <link id="mainStyles" rel="stylesheet" href="css/cra-home.css?v=20260815-4" media="all">
     <style>
     html body {
     visibility: hidden;
@@ -53,6 +54,16 @@
                   <div nav__item="">End</div>
                 </a>
               </li>
+              <li class="header__item cra-mobile-candidate-entry">
+                <a href="/me" data-cra-account="" aria-label="查看我的报名" class="header_link">
+                  <div nav__item="">我的报名</div>
+                </a>
+              </li>
+              <li class="header__item cra-mobile-candidate-entry">
+                <a href="/apply" data-cra-registration="" aria-label="进入报名页面" class="header_link">
+                  <div nav__item="">报名入口</div>
+                </a>
+              </li>
             </ul>
             <aside id="indicator" class="header__indicator">
             </aside>
@@ -79,6 +90,11 @@
           <div class="burger__bg">
           </div>
           <div nav__item="" class="header__cta">
+            <a data-anchors-nav="link" data-magnetic="" href="/me" aria-label="查看我的报名" data-cra-account="" class="button is--account">
+              <div class="button__text">
+                <div class="button__text-inner">我的报名</div>
+              </div>
+            </a>
             <a data-anchors-nav="link" data-magnetic="" href="/apply" aria-label="进入报名页面" data-cra-registration="" class="button">
               <div class="button__text">
                 <div class="button__text-inner">报名入口</div>
@@ -442,7 +458,7 @@
   <script type="module" crossorigin="anonymous" src="js/cra-home-vendors.js">
   </script>
   <link rel="stylesheet" href="css/laboratory-scene.css?v=20260814-3">
-  <script src="js/cra-home-content.js?v=20260814-2">
+  <script src="js/cra-home-content.js?v=20260815-2">
   </script>
   <script type="module" crossorigin="anonymous" src="js/cra-home.js?v=20260814-4">
   </script>

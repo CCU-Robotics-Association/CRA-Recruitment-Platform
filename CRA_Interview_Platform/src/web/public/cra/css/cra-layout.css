@@ -265,7 +265,7 @@ label {
   color: #fff;
   background-color: #1b1b1b;
   padding-top: 12rem;
-  padding-bottom: 2.6rem;
+  padding-bottom: 6rem;
 }
 
 .s.is--robot-showcase {
@@ -945,6 +945,7 @@ label {
 
   .s.is--footer {
     padding-top: 6.4rem;
+    padding-bottom: 2.6rem;
   }
 
   .s.is--robot-showcase {

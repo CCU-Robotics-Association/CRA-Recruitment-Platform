@@ -6,4 +6,3 @@
     <RouterLink class="primary-action" to="/">返回首页</RouterLink>
   </main>
 </template>
-

@@ -1,13 +1,34 @@
 (() => {
+  const registrationLinks = Array.from(
+    document.querySelectorAll("[data-cra-registration]"),
+  );
+  const accountLinks = Array.from(
+    document.querySelectorAll("[data-cra-account]"),
+  );
+
   const openRegistration = (event) => {
     event.preventDefault();
     event.stopImmediatePropagation();
     window.location.assign("/apply");
   };
 
-  document.querySelectorAll("[data-cra-registration]").forEach((link) => {
+  const openCandidateAccount = (event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.location.assign("/me");
+  };
+
+  for (const link of registrationLinks) {
+    link.href = "/apply";
+    link.setAttribute("aria-label", "进入报名页面");
     link.addEventListener("click", openRegistration, true);
-  });
+  }
+
+  for (const link of accountLinks) {
+    link.href = "/me";
+    link.setAttribute("aria-label", "查看我的报名");
+    link.addEventListener("click", openCandidateAccount, true);
+  }
 
   document.addEventListener(
     "click",

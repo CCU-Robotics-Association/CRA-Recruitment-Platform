@@ -3011,11 +3011,11 @@ function Fe() {
 function qe() {
   const e = document.getElementById("mainStyles");
   e
-    ? e.isLoaded
+    ? e.sheet
       ? Ue()
       : e.addEventListener("load", () => {
           Ue();
-        })
+        }, { once: !0 })
     : console.warn('The "mainStyles" stylesheet not found');
 }
 ((window.updateViewportUnits = () => {
@@ -3086,7 +3086,7 @@ Y.isWebGL2Available()
         enableGlFallback(reason);
         qe();
       };
-      const timeout = window.setTimeout(() => fail("load-timeout"), 15000);
+      const timeout = window.setTimeout(() => fail("load-timeout"), 7000);
       Promise.all([Ne.load(), je()])
         .then(() => {
           if (settled) return;
