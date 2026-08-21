@@ -1768,3 +1768,9 @@ html.is-mobile #join-us .cursor.is--join .cra-join-label {
   border-color: #252525;
   background: #252525;
 }
+
+@media screen and (min-width: 992px) {
+  .hero__intro-w {
+    padding-left: 19rem;
+  }
+}
